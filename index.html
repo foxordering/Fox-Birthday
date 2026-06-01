@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foxito Birthday Rush</title>
+    <!-- Tailwind CSS para el diseño premium de la interfaz -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animaciones personalizadas para una experiencia suave */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        /* Eliminar selección de texto molesta al jugar en móviles */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            outline: none;
+
+        /* Layout horizontal para desktop y responsive para celular */
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(249, 115, 22, 0.22), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.20), transparent 30%),
+                #020617;
+        }
+
+        #app-shell {
+            width: 100vw;
+            min-height: 100svh;
+            display: grid;
+            grid-template-columns: minmax(280px, 390px) minmax(300px, 540px);
+            gap: 28px;
+            align-items: center;
+            justify-content: center;
+            padding: 28px;
+        }
+
+        #desktop-instructions {
+            width: 100%;
+            max-width: 390px;
+        }
+
+        #container {
+            width: min(48vw, calc(92vh * 9 / 16), 540px) !important;
+            height: min(92vh, calc(48vw * 16 / 9), 960px) !important;
+            max-width: 540px !important;
+            max-height: 960px !important;
+            aspect-ratio: 9 / 16;
+        }
+
+        .info-card {
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 20px 60px rgba(0,0,0,.28);
+            backdrop-filter: blur(14px);
+        }
+
+        @media (max-width: 900px), (orientation: portrait) {
+            body {
+                overflow-y: auto;
+            }
+
+            #app-shell {
+                min-height: 100svh;
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 14px;
+            }
+
+            #container {
+                order: 1;
+                width: min(100%, 430px) !important;
+                height: auto !important;
+                aspect-ratio: 9 / 16;
+                max-width: 430px !important;
+                max-height: none !important;
+                margin: 0 auto;
+                border-radius: 28px !important;
+                border-width: 8px !important;
+            }
+
+            #desktop-instructions {
+                order: 2;
+                max-width: 430px;
+                margin: 0 auto 20px;
+            }
+
+            .mobile-hide {
+                display: none;
+            }
+        }
+
+        @media (max-height: 700px) and (orientation: landscape) {
+            #app-shell {
+                padding: 14px;
+                gap: 16px;
+            }
+
+            #container {
+                height: 92vh !important;
+                width: calc(92vh * 9 / 16) !important;
+            }
+
+            #desktop-instructions {
+                max-width: 350px;
+            }
+        }
+
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-white font-sans min-h-screen overflow-x-hidden">
+
+
+    <main id="app-shell">
+
+        <aside id="desktop-instructions" class="info-card rounded-[32px] p-6 md:p-7 space-y-5">
+            <div class="space-y-3">
+                <span class="inline-flex bg-gradient-to-r from-orange-500 to-amber-400 text-white text-[11px] font-black tracking-widest px-4 py-1.5 rounded-full uppercase shadow">
+                    Fox 12th Birthday
+                </span>
+                <h1 class="text-4xl md:text-5xl font-black tracking-tighter leading-none uppercase">
+                    Foxito Birthday Rush
+                </h1>
+                <p class="text-orange-300 text-sm md:text-base font-semibold leading-relaxed mb-2">
+                    ¿Tienes lo necesario para llegar al primer lugar?
+                </p>
+            </div>
+
+            <div class="grid gap-3 text-sm">
+                <div class="bg-black/35 rounded-2xl p-4 border border-white/10">
+                    <h2 class="font-black uppercase text-orange-300 text-xs tracking-widest mb-2">Cómo jugar</h2>
+                    <p class="text-slate-300 leading-relaxed">
+                        Haz clic, toca la pantalla o presiona espacio cuando el balón baje a la zona de golpe.
+                    </p>
+                </div>
+
+
+                <div class="bg-black/35 rounded-2xl p-4 border border-white/10 mobile-hide">
+                    <h2 class="font-black uppercase text-yellow-300 text-xs tracking-widest mb-2">Pro tip:</h2>
+                    <p class="text-slate-300 leading-relaxed">
+                        El juego sube la dificultad poco a poco. No presiones la pantalla sin parar, calcula tus jugadas.
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Contenedor del Dispositivo Móvil Físico (Proporción vertical 9:16) -->
+    <div id="container" class="relative w-full h-full max-w-[540px] max-h-[960px] md:h-[92vh] md:w-[51.75vh] flex items-center justify-center bg-black md:rounded-[40px] md:shadow-2xl md:border-[12px] md:border-slate-800 overflow-hidden">
+        
+        <!-- PANTALLA DE CARGA -->
+        <div id="screen-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 z-50 text-center px-6">
+            <div class="relative mb-6">
+                <div class="w-20 h-20 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-xl font-bold">🦊</div>
+            </div>
+            <h2 class="text-xl font-black text-orange-400 tracking-wider">FOXITO BIRTHDAY RUSH</h2>
+            <p class="text-slate-400 text-sm mt-2">Construyendo el estadio y preparando animaciones...</p>
+        </div>
+
+        <!-- CANVAS PRINCIPAL DEL JUEGO -->
+        <canvas id="gameCanvas" class="block w-full h-full cursor-pointer"></canvas>
+
+        <!-- INDICADOR DE DIFICULTAD ACTIVA (ESQUINA SUPERIOR IZQUIERDA) -->
+        <div id="hud-difficulty" class="hidden absolute top-4 left-4 z-40 bg-black/60 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-2 shadow-md">
+            <span id="difficulty-dot" class="w-2.5 h-2.5 rounded-full animate-pulse"></span>
+            <span class="text-[11px] font-black tracking-wide uppercase text-slate-300">
+                Nivel: <span id="difficulty-label">PRINCIPIANTE</span>
+            </span>
+        </div>
+
+        <!-- PANTALLA DE INICIO (TOUCH TO KICK) -->
+        <div id="screen-start" class="hidden absolute inset-0 bg-black/60 flex flex-col items-center justify-between py-16 px-6 z-20 cursor-pointer animate-fade-in text-center">
+            <div class="space-y-2 mt-4">
+<h1 class="text-5xl font-black tracking-tighter text-white drop-shadow-lg uppercase mt-2">
+                    FOXITO BIRTHDAY RUSH
+                </h1>
+                <p class="text-slate-200 text-sm max-w-xs mx-auto mt-2 font-medium">
+                    Mantén el balón en el aire y celebra los 12 años de Fox. Haz clic o pulsa la pantalla cuando el balón baje a la altura de los botines de Foxito.
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center space-y-4">
+                <div class="animate-bounce flex flex-col items-center">
+                    <span class="text-white text-lg font-black bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 rounded-full shadow-2xl border-2 border-white/20 uppercase tracking-widest">
+                        ⚽ ¡Clic para Iniciar!
+                    </span>
+                </div>
+                <span class="text-slate-400 text-xs font-medium">O presiona la tecla <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded font-mono">Espacio</span></span>
+            </div>
+
+            <div class="space-y-3 w-full max-w-[280px]">
+                <div class="bg-black/70 px-6 py-3 rounded-2xl border border-white/10 flex justify-between items-center">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-bold">Mejor Récord</span>
+                    <span id="start-high-score" class="text-2xl font-black text-yellow-400 font-mono">0 Toques</span>
+                </div>
+</div>
+        </div>
+
+        <!-- PANTALLA DE GAME OVER -->
+        <div id="screen-gameover" class="hidden absolute inset-0 bg-black/85 flex flex-col items-center justify-center px-6 z-30 text-center animate-fade-in">
+            <div class="bg-slate-900 border-2 border-slate-800 rounded-[32px] p-8 max-w-xs w-full shadow-2xl space-y-6">
+                <div>
+                    <h2 class="text-rose-500 text-[10px] uppercase font-extrabold tracking-widest">¡Fin de la partida!</h2>
+                    <h3 class="text-3xl font-black text-white mt-1">¡SE CAYÓ EL BALÓN!</h3>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-500 text-[10px] block uppercase font-bold">Puntos</span>
+                        <span id="final-score" class="text-4xl font-black text-white font-mono">0</span>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-500 text-[10px] block uppercase font-bold">Récord</span>
+                        <span id="final-high-score" class="text-4xl font-black text-yellow-400 font-mono">0</span>
+                    </div>
+                </div>
+
+                <div id="new-record-tag" class="hidden bg-yellow-500/10 border border-yellow-500/30 py-2.5 rounded-xl animate-pulse">
+                    <span class="text-yellow-400 text-xs font-black uppercase tracking-widest">👑 ¡NUEVA MARCA HISTÓRICA! 👑</span>
+                </div>
+
+                <div class="space-y-2">
+                    <button id="btn-restart" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black py-4 px-6 rounded-2xl shadow-xl transition-all transform active:scale-95 text-lg uppercase tracking-wider">
+                        🔁 Jugar de Nuevo
+                    </button>
+                    <span class="text-slate-500 text-xs block">O pulsa la tecla Espacio</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE INSTRUCCIONES -->
+        <div id="modal-instructions" class="hidden absolute inset-0 bg-black/95 flex items-center justify-center p-6 z-50 animate-fade-in">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-xs text-left space-y-4">
+                <h3 class="text-xl font-black text-orange-400 text-center uppercase">¿Cómo Jugar?</h3>
+                
+                <ul class="space-y-3 text-slate-300 text-sm">
+                    <li class="flex items-start">
+                        <span class="bg-orange-500/20 text-orange-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0">1</span>
+                        El balón caerá libremente desde la parte superior.
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-orange-500/20 text-orange-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0">2</span>
+                        Haz clic en pantalla (o pulsa la tecla <span class="font-mono text-white bg-slate-800 px-1.5 py-0.2 rounded text-xs">Espacio</span>) cuando esté en la línea o cerca de los pies de Foxito.
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-orange-500/20 text-orange-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0">3</span>
+                        La precisión importa. No presiones la pantalla sin parar, calcula tus jugadas y busca el toque perfecto.
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-orange-500/20 text-orange-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0">4</span>
+                        A mayor puntuación, aumenta la velocidad de caída. No presiones la pantalla sin parar, calcula tus jugadas.
+                    </li>
+                </ul>
+
+                <button id="btn-close-instructions" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-xl transition-all text-sm uppercase">
+                    Entendido
+                </button>
+            </div>
+        </div>
+
+        <!-- BOTÓN MUTE FLOTANTE -->
+        <button id="btn-mute" class="absolute top-4 right-4 z-40 bg-black/60 border border-white/10 hover:bg-black/80 w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-md" title="Silenciar audio">
+            <!-- Icono de sonido activo por defecto -->
+            <svg id="svg-sound-on" class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" strokeLinejoin="round" stroke-width="2.5" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 18.75V5.25L7.75 9.5H4.5v5h3.25L12 18.75z" />
+            </svg>
+            <!-- Icono de sonido desactivado -->
+            <svg id="svg-sound-off" class="hidden w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" strokeLinejoin="round" stroke-width="2.5" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                <path stroke-linecap="round" strokeLinejoin="round" stroke-width="2.5" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            </svg>
+        </button>
+
+    </div>
+
+    </main>
+
+    <!-- CÓDIGO DEL JUEGO (VANILLA JAVASCRIPT EXTREMADAMENTE COMPATIBLE) -->
+    <script>
+        (() => {
+        'use strict';
+
+        // --- VARIABLES DE ELEMENTOS DEL DOM ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('container');
+        
+        const screenLoading = document.getElementById('screen-loading');
+        const screenStart = document.getElementById('screen-start');
+        const screenGameover = document.getElementById('screen-gameover');
+        const modalInstructions = document.getElementById('modal-instructions');
+        
+        const hudDifficulty = document.getElementById('hud-difficulty');
+        const difficultyDot = document.getElementById('difficulty-dot');
+        const difficultyLabel = document.getElementById('difficulty-label');
+        
+        const startHighScoreText = document.getElementById('start-high-score');
+        const finalScoreText = document.getElementById('final-score');
+        const finalHighScoreText = document.getElementById('final-high-score');
+        const newRecordTag = document.getElementById('new-record-tag');
+        
+        const btnShowInstructions = document.getElementById('btn-show-instructions');
+        const btnCloseInstructions = document.getElementById('btn-close-instructions');
+        const btnRestart = document.getElementById('btn-restart');
+        const btnMute = document.getElementById('btn-mute');
+        
+        const svgSoundOn = document.getElementById('svg-sound-on');
+        const svgSoundOff = document.getElementById('svg-sound-off');
+
+        // --- ESTADO GENERAL ---
+        let gameState = 'loading'; // loading, start, playing, gameover
+        let score = 0;
+        let highScore = 0;
+        let soundEnabled = true;
+
+        // Intentar recuperar el récord del localStorage de forma segura
+        try {
+            highScore = parseInt(localStorage.getItem('foxito_high_score') || '0', 10);
+        } catch(e) {
+            highScore = 0;
+        }
+
+        // --- SISTEMA DE GRÁFICOS Y CARGA ---
+        const stadiumBg = new Image();
+        const foxIdleSprite = new Image();
+        const foxPrepSprite = new Image();
+        const foxKickSprite = new Image();
+        const foxBdayIdleSprite = new Image();
+        const foxBdayPrepSprite = new Image();
+        const foxBdayKickSprite = new Image();
+        const foxBdayPopSprite = new Image();
+        const foxBdayAfterPopSprite = new Image();
+        const foxBdayHandsPopSprite = new Image();
+        const foxBdayCelebrateSprite = new Image();
+        const ballSprite = new Image();
+        const birthdayCrowdAudio = new Audio();
+        birthdayCrowdAudio.preload = 'auto';
+        birthdayCrowdAudio.src = 'assets/birthday_cheer.mp3';
+        birthdayCrowdAudio.volume = 0.72;
+        const BALL_X = 330;
+
+        // Referencias para el bucle y la física
+        const state = {
+            gameState: 'loading',
+            score: 0,
+            highScore: highScore,
+            globalTime: 0,
+            screenShake: 0,
+            // Balón
+            ball: {
+                x: BALL_X,
+                y: 120,
+                vy: 0,
+                radius: 30,
+                rotation: 0,
+                omega: 0
+            },
+            // Foxito
+            foxito: {
+                x: 270,
+                y: 900,
+                width: 250,
+                height: 250,
+                state: 'idle', // idle, anticipation, kicking, follow
+                kickTimer: 0,
+                kickCooldown: 0
+            },
+            // Nubes flotantes
+            clouds: [
+                { x: 40, y: 100, speed: 0.25, size: 0.8 },
+                { x: 300, y: 160, speed: 0.15, size: 0.6 },
+                { x: -120, y: 60, speed: 0.20, size: 1.0 }
+            ],
+            // Dificultad actual
+            difficulty: {
+                gravity: 0.45,
+                targetVy: -12.5,
+                label: 'PRINCIPIANTE',
+                color: '#22c55e'
+            },
+            particles: [],
+            floatingTexts: [],
+            width: 540,
+            height: 960,
+            scale: 1,
+            birthday: {
+                triggered: false,
+                unlocked: false,
+                active: false,
+                timer: 0,
+                duration: 4700,
+                frozenVy: 0,
+                frozenOmega: 0,
+                ballTargetY: 0,
+                popPlayed: false,
+                secondPopPlayed: false,
+                partyPlayed: false,
+                extraConfettiPlayed: false
+            }
+        };
+
+        // --- SINTETIZADOR DE AUDIO CLÁSICO (WEB AUDIO API) ---
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playBirthdayCrowdAudio() {
+            if (!soundEnabled) return;
+            try {
+                birthdayCrowdAudio.pause();
+                birthdayCrowdAudio.currentTime = 0;
+                const p = birthdayCrowdAudio.play();
+                if (p && typeof p.catch === 'function') p.catch(() => {});
+            } catch (e) {
+                console.warn('No se pudo reproducir el audio de celebración:', e);
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'applause') {
+                    // Aplausos sintéticos más audibles con bursts de ruido + cuerpo de gradería.
+                    for (let i = 0; i < 46; i++) {
+                        const clapTime = now + Math.random() * 1.9;
+                        const duration = 0.055 + Math.random() * 0.06;
+                        const bufferSize = Math.floor(audioCtx.sampleRate * duration);
+                        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                        const data = buffer.getChannelData(0);
+
+                        for (let j = 0; j < bufferSize; j++) {
+                            const env = Math.pow(1 - j / bufferSize, 1.65);
+                            data[j] = (Math.random() * 2 - 1) * env;
+                        }
+
+                        const source = audioCtx.createBufferSource();
+                        source.buffer = buffer;
+
+                        const clapFilter = audioCtx.createBiquadFilter();
+                        clapFilter.type = 'bandpass';
+                        clapFilter.frequency.setValueAtTime(900 + Math.random() * 1800, clapTime);
+                        clapFilter.Q.setValueAtTime(0.55, clapTime);
+
+                        const clapGain = audioCtx.createGain();
+                        clapGain.gain.setValueAtTime(0.14 + Math.random() * 0.08, clapTime);
+                        clapGain.gain.exponentialRampToValueAtTime(0.001, clapTime + duration);
+
+                        source.connect(clapFilter);
+                        clapFilter.connect(clapGain);
+                        clapGain.connect(audioCtx.destination);
+                        source.start(clapTime);
+                        source.stop(clapTime + duration);
+                    }
+
+                    // Capa suave de estadio para que no suene como un solo click.
+                    const crowdDuration = 1.7;
+                    const crowdBufferSize = Math.floor(audioCtx.sampleRate * crowdDuration);
+                    const crowdBuffer = audioCtx.createBuffer(1, crowdBufferSize, audioCtx.sampleRate);
+                    const crowdData = crowdBuffer.getChannelData(0);
+
+                    for (let j = 0; j < crowdBufferSize; j++) {
+                        const attack = Math.min(1, j / (audioCtx.sampleRate * 0.18));
+                        const release = Math.min(1, (crowdBufferSize - j) / (audioCtx.sampleRate * 0.45));
+                        const env = Math.min(attack, release) * 0.22;
+                        crowdData[j] = (Math.random() * 2 - 1) * env;
+                    }
+
+                    const crowdSource = audioCtx.createBufferSource();
+                    crowdSource.buffer = crowdBuffer;
+
+                    const crowdFilter = audioCtx.createBiquadFilter();
+                    crowdFilter.type = 'bandpass';
+                    crowdFilter.frequency.setValueAtTime(650, now);
+                    crowdFilter.Q.setValueAtTime(0.35, now);
+
+                    const crowdGain = audioCtx.createGain();
+                    crowdGain.gain.setValueAtTime(0.22, now);
+                    crowdGain.gain.exponentialRampToValueAtTime(0.001, now + crowdDuration);
+
+                    crowdSource.connect(crowdFilter);
+                    crowdFilter.connect(crowdGain);
+                    crowdGain.connect(audioCtx.destination);
+                    crowdSource.start(now);
+                    crowdSource.stop(now + crowdDuration);
+                    return;
+                }
+
+                if (type === 'kick') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.exponentialRampToValueAtTime(450, now + 0.08);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'whiff') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(250, now);
+                    osc.frequency.exponentialRampToValueAtTime(60, now + 0.15);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'gameover') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.linearRampToValueAtTime(80, now + 0.6);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                } else if (type === 'record') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    osc.frequency.setValueAtTime(783.99, now + 0.16);
+                    osc.frequency.setValueAtTime(1046.50, now + 0.24);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                    osc.start(now);
+                    osc.stop(now + 0.45);
+                } else if (type === 'level_up') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.setValueAtTime(600, now + 0.1);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'pop') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(760, now);
+                    osc.frequency.exponentialRampToValueAtTime(180, now + 0.11);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.13);
+                    osc.start(now);
+                    osc.stop(now + 0.13);
+                } else if (type === 'birthday') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.09);
+                    osc.frequency.setValueAtTime(783.99, now + 0.18);
+                    osc.frequency.setValueAtTime(1046.50, now + 0.30);
+                    gain.gain.setValueAtTime(0.16, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.62);
+                    osc.start(now);
+                    osc.stop(now + 0.62);
+                }
+            } catch (e) {
+                console.warn("Audio Context bloqueado o no soportado en este navegador:", e);
+            }
+        }
+
+        // --- CARGADOR INTELIGENTE DE RECURSOS ---
+        function loadAssetWithFallbacks(img, paths, onComplete) {
+            let index = 0;
+            const tryLoad = () => {
+                if (index >= paths.length) {
+                    onComplete(false);
+                    return;
+                }
+                img.src = paths[index];
+                index++;
+            };
+            img.onload = () => onComplete(true);
+            img.onerror = tryLoad;
+            tryLoad();
+        }
+
+        let loadedCount = 0;
+        const totalAssets = 12;
+
+        function checkAllLoaded() {
+            loadedCount++;
+            if (loadedCount === totalAssets) {
+                gameState = 'start';
+                state.gameState = 'start';
+                updateScreenUI();
+                screenLoading.classList.add('hidden');
+            }
+        }
+
+        // 1. Cargar fondo
+        loadAssetWithFallbacks(stadiumBg, [
+            'assets/stadium.png',
+            'stadium.png',
+            'foxito21_package/assets/stadium.png',
+            'foxito21_actualizado.zip/foxito21_package/assets/stadium.png'
+        ], (success) => {
+            if (!success) console.warn("Usando estadio vectorial procedimental por defecto.");
+            checkAllLoaded();
+        });
+
+        // 2. Cargar sprites individuales de Foxito
+        loadAssetWithFallbacks(foxIdleSprite, [
+            'assets/foxito_idle_black2.png',
+            'foxito_idle_black2.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite idle de Foxito.");
+            checkAllLoaded();
+        });
+
+        loadAssetWithFallbacks(foxPrepSprite, [
+            'assets/foxito_prep_black2.png',
+            'foxito_prep_black2.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite de preparación de Foxito.");
+            checkAllLoaded();
+        });
+
+        loadAssetWithFallbacks(foxKickSprite, [
+            'assets/foxito_kick_black2.png',
+            'foxito_kick_black2.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite de patada de Foxito.");
+            checkAllLoaded();
+        });
+
+
+        // 2B. Cargar sprites de cumpleaños de Foxito
+        loadAssetWithFallbacks(foxBdayIdleSprite, [
+            'assets/foxito_bday_idle.png',
+            'foxito_bday_idle.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite birthday idle de Foxito.");
+            checkAllLoaded();
+        });
+
+        loadAssetWithFallbacks(foxBdayPrepSprite, [
+            'assets/foxito_bday_prep.png',
+            'foxito_bday_prep.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite birthday prep de Foxito.");
+            checkAllLoaded();
+        });
+
+        loadAssetWithFallbacks(foxBdayKickSprite, [
+            'assets/foxito_bday_kick.png',
+            'foxito_bday_kick.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite birthday kick de Foxito.");
+            checkAllLoaded();
+        });
+
+        loadAssetWithFallbacks(foxBdayPopSprite, [
+            'assets/foxito_bday_pop_head.png',
+            'foxito_bday_pop_head.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite POP de cumpleaños.");
+            checkAllLoaded();
+        });
+
+        loadAssetWithFallbacks(foxBdayAfterPopSprite, [
+            'assets/foxito_bday_hat_reaction.png',
+            'foxito_bday_hat_reaction.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite de reacción con sombrero.");
+            checkAllLoaded();
+        });
+
+        loadAssetWithFallbacks(foxBdayHandsPopSprite, [
+            'assets/foxito_bday_pop_hands.png',
+            'foxito_bday_pop_hands.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite POP en manos.");
+            checkAllLoaded();
+        });
+
+        loadAssetWithFallbacks(foxBdayCelebrateSprite, [
+            'assets/foxito_bday_cake_front.png',
+            'foxito_bday_cake_front.png'
+        ], (success) => {
+            if (!success) console.warn("No se pudo cargar el sprite de celebración de cumpleaños.");
+            checkAllLoaded();
+        });
+
+        // 3. Cargar balón
+        loadAssetWithFallbacks(ballSprite, [
+            'assets/ball.png',
+            'ball.png',
+            'foxito21_package/assets/ball.png',
+            'foxito21_actualizado.zip/foxito21_package/assets/ball.png'
+        ], (success) => {
+            if (!success) console.warn("Usando balón vectorial procedimental por defecto.");
+            checkAllLoaded();
+        });
+
+        // --- REMOCIÓN DEL FONDO CUADRICULADO DEL SPRITESHEET (FLOOD-FILL) ---
+        function processSpriteSheet() {
+            try {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = originalSprites.width;
+                tempCanvas.height = originalSprites.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(originalSprites, 0, 0);
+
+                const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                const data = imgData.data;
+                const w = tempCanvas.width;
+                const h = tempCanvas.height;
+
+                const visited = new Uint8Array(w * h);
+                const queue = [];
+
+                // Llenar bordes
+                for (let x = 0; x < w; x++) {
+                    queue.push(x, 0);
+                    queue.push(x, h - 1);
+                    visited[x] = 1;
+                    visited[x + (h - 1) * w] = 1;
+                }
+                for (let y = 1; y < h - 1; y++) {
+                    queue.push(0, y);
+                    queue.push(w - 1, y);
+                    visited[y * w] = 1;
+                    visited[w - 1 + y * w] = 1;
+                }
+
+                const isBgColor = (r, g, b) => {
+                    const isWhite = r > 195 && g > 195 && b > 195;
+                    const isGrey = Math.abs(r - g) < 15 && Math.abs(g - b) < 15 && r > 140 && r < 210;
+                    return isWhite || isGrey;
+                };
+
+                let head = 0;
+                while (head < queue.length) {
+                    const cx = queue[head++];
+                    const cy = queue[head++];
+                    const idx = (cy * w + cx) * 4;
+
+                    const r = data[idx];
+                    const g = data[idx + 1];
+                    const b = data[idx + 2];
+
+                    if (isBgColor(r, g, b)) {
+                        data[idx + 3] = 0; // Transparente
+
+                        const neighbors = [
+                            [cx + 1, cy], [cx - 1, cy],
+                            [cx, cy + 1], [cx, cy - 1]
+                        ];
+
+                        for (const [nx, ny] of neighbors) {
+                            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                                const nidx = ny * w + nx;
+                                if (!visited[nidx]) {
+                                    visited[nidx] = 1;
+                                    queue.push(nx, ny);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                tempCtx.putImageData(imgData, 0, 0);
+                cleanedSprites = tempCanvas;
+            } catch (e) {
+                console.warn("La restricción CORS local de navegador (file://) impide leer pixeles. Usando spritesheet por defecto o procedimental.", e);
+            }
+        }
+
+        // --- MANEJO DEL DISEÑO DE PANTALLAS (RESPONSIVE 9:16) ---
+        function handleResize() {
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+
+            let w = containerWidth;
+            let h = containerWidth * (16 / 9);
+
+            if (h > containerHeight) {
+                h = containerHeight;
+                w = containerHeight * (9 / 16);
+            }
+
+            canvas.style.width = `${w}px`;
+            canvas.style.height = `${h}px`;
+
+            canvas.width = 540;
+            canvas.height = 960;
+            state.scale = w / 540;
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+
+        // --- SISTEMAS DE DIFICULTAD ---
+        function updateDifficultyStats(currentScore) {
+            const oldLabel = state.difficulty.label;
+
+            // Dificultad por tramos.
+            // 0-12 se mantiene amable para que el hito de cumpleaños sea alcanzable.
+            // Después escala más fuerte para evitar partidas infinitas sin volverlo injusto.
+            let gravity = 0.45;
+            let targetVy = -12.5;
+
+            if (currentScore <= 12) {
+                const p = currentScore / 12;
+                gravity = 0.45 + (p * 0.14);
+                targetVy = -12.5 - (p * 0.70);
+                state.difficulty.label = currentScore <= 5 ? 'PRINCIPIANTE' : 'AMATEUR';
+                state.difficulty.color = currentScore <= 5 ? '#22c55e' : '#38bdf8';
+            } else if (currentScore <= 35) {
+                const p = (currentScore - 12) / 23;
+                gravity = 0.62 + (p * 0.22);
+                targetVy = -13.30 - (p * 1.05);
+                state.difficulty.label = 'PROFESIONAL';
+                state.difficulty.color = '#eab308';
+            } else if (currentScore <= 70) {
+                const p = (currentScore - 35) / 35;
+                gravity = 0.86 + (p * 0.28);
+                targetVy = -14.45 - (p * 1.25);
+                state.difficulty.label = 'CRACK MUNDIAL';
+                state.difficulty.color = '#f97316';
+            } else if (currentScore <= 120) {
+                const p = (currentScore - 70) / 50;
+                gravity = 1.16 + (p * 0.24);
+                targetVy = -15.85 - (p * 1.00);
+                state.difficulty.label = 'LEYENDA DE FOXITO';
+                state.difficulty.color = '#ef4444';
+            } else {
+                const p = Math.min(1, (currentScore - 120) / 80);
+                gravity = 1.42 + (p * 0.26);
+                targetVy = -16.95 - (p * 0.85);
+                state.difficulty.label = 'MODO IMPOSIBLE';
+                state.difficulty.color = '#c084fc';
+            }
+
+            state.difficulty.gravity = gravity;
+            state.difficulty.targetVy = targetVy;
+
+            if (oldLabel !== state.difficulty.label) {
+                playSound('level_up');
+                difficultyLabel.innerText = state.difficulty.label;
+                difficultyLabel.style.color = state.difficulty.color;
+                difficultyDot.style.backgroundColor = state.difficulty.color;
+            }
+        }
+
+        // --- RENDERS PROCEDIMENTALES ANIMADOS 2D CARTOON ---
+        function drawProceduralStadium(ctx, width, height, time) {
+            // 1. Cielo Atardecer
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, height * 0.55);
+            skyGrad.addColorStop(0, '#1d4ed8');
+            skyGrad.addColorStop(0.4, '#4f46e5');
+            skyGrad.addColorStop(0.75, '#ec4899');
+            skyGrad.addColorStop(1, '#ffedd5');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // 2. Focos luminosos
+            const beamPulse = Math.sin(time * 0.05) * 0.04 + 0.14;
+            ctx.fillStyle = `rgba(255, 255, 255, ${beamPulse})`;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(165, height);
+            ctx.lineTo(375, height);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(width, 0);
+            ctx.lineTo(width - 165, height);
+            ctx.lineTo(width - 375, height);
+            ctx.closePath();
+            ctx.fill();
+
+            // 3. Nubes
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
+            function drawCartoonCloud(cx, cy, scale) {
+                ctx.save();
+                ctx.translate(cx % (width + 240) - 120, cy);
+                ctx.scale(scale, scale);
+                ctx.beginPath();
+                ctx.arc(0, 0, 35, 0, Math.PI * 2);
+                ctx.arc(45, -12, 45, 0, Math.PI * 2);
+                ctx.arc(100, 0, 38, 0, Math.PI * 2);
+                ctx.arc(135, 12, 28, 0, Math.PI * 2);
+                ctx.rect(-10, 10, 160, 20);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+
+            state.clouds.forEach(cloud => {
+                cloud.x += cloud.speed;
+                drawCartoonCloud(cloud.x, cloud.y, cloud.size);
+            });
+
+            // 4. Techo de la Tribuna
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.moveTo(-10, height * 0.28);
+            ctx.quadraticCurveTo(width / 2, height * 0.36, width + 10, height * 0.28);
+            ctx.lineTo(width + 10, height * 0.34);
+            ctx.quadraticCurveTo(width / 2, height * 0.42, -10, height * 0.34);
+            ctx.closePath();
+            ctx.fill();
+
+            // Focos LED
+            const lightCount = 10;
+            for (let i = 0; i < lightCount; i++) {
+                const ratio = i / (lightCount - 1);
+                const tX = 35 + ratio * (width - 70);
+                const tY = height * 0.28 + Math.sin(ratio * Math.PI) * 35;
+                
+                const spark = (time + i * 20) % 60 < 4 ? 1.4 : 1.0;
+                const lightGrad = ctx.createRadialGradient(tX, tY + 4, 1, tX, tY + 4, 18 * spark);
+                lightGrad.addColorStop(0, '#ffffff');
+                lightGrad.addColorStop(0.3, 'rgba(253,224,71,0.95)');
+                lightGrad.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = lightGrad;
+                ctx.beginPath();
+                ctx.arc(tX, tY + 4, 18 * spark, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 5. Gradas
+            ctx.fillStyle = '#1e1b4b';
+            ctx.beginPath();
+            ctx.moveTo(0, height * 0.38);
+            ctx.quadraticCurveTo(width / 2, height * 0.45, width, height * 0.38);
+            ctx.lineTo(width, height * 0.58);
+            ctx.quadraticCurveTo(width / 2, height * 0.65, 0, height * 0.58);
+            ctx.closePath();
+            ctx.fill();
+
+            // Espectadores
+            for (let level = 0; level < 4; level++) {
+                const rowY = height * 0.41 + level * 22;
+                for (let s = 10; s < width; s += 16) {
+                    const offsetVal = Math.sin((s + level * 60) * 0.1) * 3;
+                    const colors = ['#3b82f6', '#60a5fa', '#f97316', '#fb923c', '#ffffff'];
+                    ctx.fillStyle = colors[(s + level) % colors.length];
+                    ctx.beginPath();
+                    ctx.arc(s + (level % 2) * 8, rowY + offsetVal, 6.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (Math.random() < 0.0008) {
+                        ctx.save();
+                        ctx.fillStyle = '#ffffff';
+                        const starSize = Math.random() * 14 + 8;
+                        ctx.beginPath();
+                        ctx.arc(s + (level % 2) * 8, rowY + offsetVal, starSize, 0, Math.PI * 2);
+                        ctx.shadowColor = '#ffffff';
+                        ctx.shadowBlur = 12;
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }
+            }
+
+            // Publicidad de Valla
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillRect(0, height * 0.58, width, height * 0.08);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "italic bold 17px 'Arial Black', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.fillText("⚽ COPA FOXITO 2026 • SELECCIÓN ⚽", width / 2, height * 0.635);
+
+            // Césped
+            const grassY = height * 0.65;
+            ctx.fillStyle = '#4ade80';
+            ctx.fillRect(0, grassY, width, height - grassY);
+
+            const stripeCount = 10;
+            for (let i = 0; i < stripeCount; i++) {
+                const leftTop = (i / stripeCount) * width;
+                const rightTop = ((i + 1) / stripeCount) * width;
+                const leftBottom = (i / stripeCount) * (width * 1.5) - (width * 0.25);
+                const rightBottom = ((i + 1) / stripeCount) * (width * 1.5) - (width * 0.25);
+
+                ctx.fillStyle = i % 2 === 0 ? '#22c55e' : '#16a34a';
+                ctx.beginPath();
+                ctx.moveTo(leftTop, grassY);
+                ctx.lineTo(rightTop, grassY);
+                ctx.lineTo(rightBottom, height);
+                ctx.lineTo(leftBottom, height);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // Marcaciones blancas del terreno
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, height * 0.77);
+            ctx.lineTo(width, height * 0.77);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(width / 2, height * 0.98, 140, Math.PI, 0);
+            ctx.stroke();
+        }
+
+        function drawProceduralFoxito(ctx, fox, time) {
+            ctx.save();
+            ctx.translate(fox.x, fox.y);
+
+            const breathe = Math.sin(time * 0.08) * 4;
+            const tailWiggle = Math.sin(time * 0.05) * 0.18;
+
+            // 1. Cola
+            ctx.save();
+            ctx.translate(-25, -45 + breathe * 0.5);
+            ctx.rotate(fox.state === 'kicking' ? 0.35 : 0.05 + tailWiggle);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 24, 52, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#f97316';
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#000000';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.ellipse(15, -32, 11, 18, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            // 2. Piernas y botines
+            ctx.fillStyle = '#f97316';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 4;
+
+            if (fox.state === 'kicking') {
+                ctx.beginPath();
+                ctx.ellipse(22, -45, 10, 30, -Math.PI / 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.ellipse(36, -60, 9, 16, -Math.PI / 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#f97316';
+                ctx.beginPath();
+                ctx.ellipse(-14, -15, 10, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.ellipse(-14, -4, 9, 14, Math.PI / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.ellipse(-12, -15, 9, 20, 0, 0, Math.PI * 2);
+                ctx.ellipse(12, -15, 9, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.ellipse(-12, -4, 9, 13, Math.PI / 2, 0, Math.PI * 2);
+                ctx.ellipse(12, -4, 9, 13, Math.PI / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // 3. Camiseta
+            ctx.save();
+            ctx.translate(0, -75 + breathe * 0.6);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 28, 42, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#38bdf8';
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#000000';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.rect(-27, -15, 54, 30);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(-27, -15);
+            ctx.lineTo(27, -15);
+            ctx.moveTo(-27, 15);
+            ctx.lineTo(27, 15);
+            ctx.stroke();
+            ctx.restore();
+
+            // Brazos
+            ctx.save();
+            ctx.fillStyle = '#f97316';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.ellipse(-26, -75 + breathe, 7, 20, 0.3 + tailWiggle * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(26, -75 + breathe, 7, 20, -0.3 - tailWiggle * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            // 4. Cabeza
+            ctx.save();
+            ctx.translate(0, -125 + breathe);
+
+            // Orejas
+            const drawEar = (tx, rot) => {
+                ctx.save();
+                ctx.translate(tx, -18);
+                ctx.rotate(rot);
+                ctx.beginPath();
+                ctx.moveTo(-11, 11);
+                ctx.lineTo(0, -26);
+                ctx.lineTo(11, 11);
+                ctx.closePath();
+                ctx.fillStyle = '#f97316';
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(-5, 7);
+                ctx.lineTo(0, -16);
+                ctx.lineTo(5, 7);
+                ctx.closePath();
+                ctx.fillStyle = '#fee2e2';
+                ctx.fill();
+                ctx.restore();
+            };
+            drawEar(-15, -0.2 + tailWiggle * 0.3);
+            drawEar(15, 0.2 - tailWiggle * 0.3);
+
+            // Rostro redondo
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, Math.PI * 2);
+            ctx.fillStyle = '#f97316';
+            ctx.fill();
+            ctx.stroke();
+
+            // Mejillas
+            ctx.beginPath();
+            ctx.ellipse(-16, 10, 15, 11, -Math.PI / 6, 0, Math.PI * 2);
+            ctx.ellipse(16, 10, 15, 11, Math.PI / 6, 0, Math.PI * 2);
+            ctx.ellipse(0, 14, 13, 9, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            // Ojos
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(-9, -2, 6.5, 0, Math.PI * 2);
+            ctx.arc(9, -2, 6.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(-9, -4, 2.3, 0, Math.PI * 2);
+            ctx.arc(9, -4, 2.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nariz
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.ellipse(0, 4, 6, 4.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(0, 10, 4, 0, Math.PI);
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            ctx.restore();
+            ctx.restore();
+        }
+
+
+        // --- EVENTO ESPECIAL DE CUMPLEAÑOS AL LLEGAR A 12 ---
+        function triggerBirthdayCelebration() {
+            const bday = state.birthday;
+            if (bday.triggered) return;
+
+            bday.triggered = true;
+            bday.active = true;
+            bday.unlocked = true;
+            bday.timer = bday.duration;
+            bday.frozenVy = state.ball.vy;
+            bday.frozenOmega = state.ball.omega;
+            bday.ballTargetY = Math.max(190, state.ball.y - 150);
+            bday.popPlayed = false;
+            bday.secondPopPlayed = false;
+            bday.partyPlayed = false;
+            bday.extraConfettiPlayed = false;
+
+            state.ball.vy = 0;
+            state.ball.omega = 0;
+            state.foxito.kickTimer = 0;
+            state.foxito.kickCooldown = 0;
+            state.foxito.state = 'idle';
+            state.screenShake = 10;
+
+            createBirthdayConfetti();
+        }
+
+        function updateBirthdayCelebration(dtScale, dtMs) {
+            const bday = state.birthday;
+            const elapsed = bday.duration - bday.timer;
+
+            if (!bday.popPlayed) {
+                playSound('pop');
+                bday.popPlayed = true;
+            }
+
+            if (elapsed > 1450 && !bday.secondPopPlayed) {
+                playSound('pop');
+                bday.secondPopPlayed = true;
+            }
+
+            if (elapsed > 2250 && !bday.partyPlayed) {
+                playSound('birthday');
+                setTimeout(() => playBirthdayCrowdAudio(), 80);
+                bday.partyPlayed = true;
+            }
+
+            if (elapsed > 2450 && !bday.extraConfettiPlayed) {
+                createBirthdayConfetti(90, true);
+                bday.extraConfettiPlayed = true;
+            }
+
+            bday.timer -= dtMs;
+
+            // Durante el evento, el balón sube un poco y queda suspendido para dar tiempo de reacción.
+            state.ball.y += (bday.ballTargetY - state.ball.y) * 0.12 * dtScale;
+            state.ball.vy = 0;
+            state.ball.omega = 0;
+
+            // Confeti y textos siguen vivos durante la pausa.
+            state.particles = state.particles.filter(p => {
+                p.x += p.vx * dtScale;
+                p.y += p.vy * dtScale;
+                p.vy += (p.gravity || 0.16) * dtScale;
+                p.rotation = (p.rotation || 0) + (p.spin || 0) * dtScale;
+                p.alpha -= p.decay * dtScale;
+                return p.alpha > 0;
+            });
+
+            state.floatingTexts = state.floatingTexts.filter(t => {
+                t.y += t.vy * dtScale;
+                t.alpha -= 0.025 * dtScale;
+                return t.alpha > 0;
+            });
+
+            if (bday.timer <= 0) {
+                bday.active = false;
+                state.ball.vy = Math.min(bday.frozenVy || state.difficulty.targetVy, -8);
+                state.ball.omega = bday.frozenOmega || 0.1;
+            }
+        }
+
+        function createBirthdayConfetti(amount = 160, burst = false) {
+            const colors = ['#f97316', '#facc15', '#38bdf8', '#22c55e', '#ef4444', '#ffffff', '#fb7185'];
+
+            for (let i = 0; i < amount; i++) {
+                const fromSide = burst && Math.random() > 0.45;
+                state.particles.push({
+                    x: fromSide ? (Math.random() > 0.5 ? -20 : state.width + 20) : Math.random() * state.width,
+                    y: fromSide ? (160 + Math.random() * 260) : (-20 - Math.random() * 190),
+                    vx: fromSide ? (Math.random() > 0.5 ? -1 : 1) * (Math.random() * -5.5 - 2) : (Math.random() - 0.5) * 4.6,
+                    vy: fromSide ? (Math.random() - 0.5) * 2.2 : Math.random() * 2.8 + 2.2,
+                    gravity: 0.035,
+                    size: Math.random() * 6 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: Math.random() * 0.004 + 0.003,
+                    isConfetti: true,
+                    rotation: Math.random() * Math.PI,
+                    spin: (Math.random() - 0.5) * 0.42
+                });
+            }
+
+            for (let i = 0; i < 24; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 4 + 2;
+                state.particles.push({
+                    x: state.width / 2 + (Math.random() - 0.5) * 140,
+                    y: 350 + (Math.random() - 0.5) * 90,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    gravity: 0.03,
+                    size: Math.random() * 8 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: 0.012,
+                    isStar: true
+                });
+            }
+
+            state.floatingTexts.push({
+                text: 'Happy 12th Birthday Fox',
+                x: state.width / 2,
+                y: 350,
+                vy: -0.08,
+                alpha: 1,
+                size: 40,
+                color: '#facc15',
+                isBirthdayText: true
+            });
+        }
+
+        function drawBirthdayOverlay() {
+            const bday = state.birthday;
+            if (!bday.active) return;
+
+            const elapsed = bday.duration - bday.timer;
+            const fadeIn = Math.min(1, elapsed / 350);
+            const fadeOut = Math.min(1, bday.timer / 500);
+            const alpha = Math.min(fadeIn, fadeOut);
+
+            ctx.save();
+            ctx.globalAlpha = alpha;
+
+            // Glow y baño cálido de celebración.
+            const glow = ctx.createRadialGradient(state.width / 2, 380, 20, state.width / 2, 380, 330);
+            glow.addColorStop(0, 'rgba(250, 204, 21, 0.30)');
+            glow.addColorStop(0.45, 'rgba(249, 115, 22, 0.12)');
+            glow.addColorStop(1, 'rgba(250, 204, 21, 0)');
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, state.width, state.height);
+
+            // Cintas laterales.
+            if (elapsed > 2150) {
+                const ribbonAlpha = Math.min(0.8, (elapsed - 2150) / 380);
+                ctx.globalAlpha = alpha * ribbonAlpha;
+                ctx.lineWidth = 8;
+                ctx.lineCap = 'round';
+                const ribbons = [
+                    { color: '#facc15', y: 330, phase: 0 },
+                    { color: '#f97316', y: 390, phase: 1.8 },
+                    { color: '#38bdf8', y: 455, phase: 3.2 }
+                ];
+
+                ribbons.forEach(r => {
+                    ctx.strokeStyle = r.color;
+                    ctx.beginPath();
+                    for (let x = -30; x <= state.width + 30; x += 24) {
+                        const y = r.y + Math.sin((x * 0.035) + state.globalTime * 0.08 + r.phase) * 16;
+                        if (x === -30) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                });
+                ctx.globalAlpha = alpha;
+            }
+
+            // Texto grande, más abajo y en dos líneas para que respire.
+            if (elapsed > 2350) {
+                const textAlpha = Math.min(1, (elapsed - 2350) / 260) * alpha;
+                const pulse = 1 + Math.sin(state.globalTime * 0.12) * 0.025;
+                ctx.save();
+                ctx.globalAlpha = textAlpha;
+                ctx.translate(state.width / 2, 330 + Math.sin(state.globalTime * 0.08) * 4);
+                ctx.scale(pulse, pulse);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                ctx.font = "900 44px 'Arial Black', Impact, sans-serif";
+                ctx.lineWidth = 9;
+                ctx.strokeStyle = 'rgba(15, 23, 42, 0.92)';
+                ctx.fillStyle = '#facc15';
+                ctx.shadowColor = 'rgba(250, 204, 21, 0.85)';
+                ctx.shadowBlur = 22;
+                ctx.strokeText('Happy 12th', 0, 0);
+                ctx.fillText('Happy 12th', 0, 0);
+
+                ctx.font = "900 42px 'Arial Black', Impact, sans-serif";
+                ctx.strokeText('Birthday Fox', 0, 48);
+                ctx.fillText('Birthday Fox', 0, 48);
+
+                ctx.font = "800 18px system-ui, sans-serif";
+                ctx.lineWidth = 5;
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 10;
+                ctx.strokeText('Keep it up!', 0, 92);
+                ctx.fillText('Keep it up!', 0, 92);
+                ctx.restore();
+            }
+
+            // Burst central detrás del texto.
+            if (elapsed > 950) {
+                ctx.save();
+                ctx.globalAlpha = alpha * 0.8;
+                ctx.translate(state.width / 2, 385);
+                ctx.rotate(state.globalTime * 0.01);
+                for (let i = 0; i < 18; i++) {
+                    const angle = (Math.PI * 2 / 18) * i;
+                    const inner = 105;
+                    const outer = 145 + Math.sin(state.globalTime * 0.1 + i) * 10;
+                    ctx.strokeStyle = i % 2 === 0 ? 'rgba(250,204,21,.55)' : 'rgba(249,115,22,.45)';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner);
+                    ctx.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            ctx.restore();
+        }
+
+        // --- BUCLE Y FÍSICA FOTO-REALISTA DE JUEGO ---
+        function updatePhysics(dtScale = 1, dtMs = 16.67) {
+            state.globalTime += dtScale;
+
+            if (state.screenShake > 0) {
+                state.screenShake *= 0.9;
+                if (state.screenShake < 0.2) state.screenShake = 0;
+            }
+
+            if (gameState !== 'playing') return;
+
+            if (state.birthday.active) {
+                updateBirthdayCelebration(dtScale, dtMs);
+                return;
+            }
+
+            const ball = state.ball;
+            
+            // Gravedad progresiva
+            ball.vy += state.difficulty.gravity * dtScale;
+            if (ball.vy > 18) ball.vy = 18;
+
+            ball.y += ball.vy * dtScale;
+            ball.rotation += ball.omega * dtScale;
+            ball.omega = ball.vy * 0.012;
+
+            // Caer en césped (Derrota)
+            if (ball.y + ball.radius >= 850) {
+                ball.y = 850 - ball.radius;
+                triggerGameOver();
+            }
+
+            // Animaciones de Foxito
+            const fox = state.foxito;
+            if (fox.kickTimer > 0) {
+                fox.kickTimer -= dtMs;
+                if (fox.kickTimer > 180) {
+                    fox.state = 'anticipation';
+                } else if (fox.kickTimer > 80) {
+                    fox.state = 'kicking';
+                } else if (fox.kickTimer > 0) {
+                    fox.state = 'follow';
+                } else {
+                    fox.state = 'idle';
+                }
+            } else {
+                fox.state = 'idle';
+            }
+
+            // Enfriamiento de patadas
+            if (fox.kickCooldown > 0) {
+                fox.kickCooldown -= dtMs;
+            }
+
+            // Partículas
+            state.particles = state.particles.filter(p => {
+                p.x += p.vx * dtScale;
+                p.y += p.vy * dtScale;
+                p.vy += (p.gravity || 0.16) * dtScale;
+                p.alpha -= p.decay * dtScale;
+                return p.alpha > 0;
+            });
+
+            // Textos flotantes
+            state.floatingTexts = state.floatingTexts.filter(t => {
+                t.y += t.vy * dtScale;
+                t.alpha -= 0.025 * dtScale;
+                return t.alpha > 0;
+            });
+        }
+
+        function drawGame() {
+            ctx.save();
+
+            if (state.screenShake > 0) {
+                const shakeX = (Math.random() - 0.5) * state.screenShake;
+                const shakeY = (Math.random() - 0.5) * state.screenShake;
+                ctx.translate(shakeX, shakeY);
+            }
+
+            ctx.clearRect(0, 0, state.width, state.height);
+
+            // 1. Dibujar Estadio
+            if (stadiumBg.complete && stadiumBg.naturalWidth > 0) {
+                ctx.drawImage(stadiumBg, 0, 0, state.width, state.height);
+            } else {
+                drawProceduralStadium(ctx, state.width, state.height, state.globalTime);
+            }
+
+            // 2. Línea dulce de toque
+            if (gameState === 'playing') {
+                ctx.save();
+                const syncY = 705;
+                const pulseWidth = 120 - (Math.min(15, score) * 2.2);
+                
+                const lineGrad = ctx.createLinearGradient(state.width / 2 - pulseWidth, 0, state.width / 2 + pulseWidth, 0);
+                lineGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                lineGrad.addColorStop(0.5, state.difficulty.color + '44');
+                lineGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.fillStyle = lineGrad;
+                ctx.fillRect(state.width / 2 - pulseWidth, syncY - 8, pulseWidth * 2, 16);
+                
+                ctx.strokeStyle = state.difficulty.color + '88';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(state.width / 2 - pulseWidth * 0.6, syncY);
+                ctx.lineTo(state.width / 2 + pulseWidth * 0.6, syncY);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // 3. Sombra del balón
+            const ball = state.ball;
+            const heightAboveGround = 835 - ball.y;
+            if (heightAboveGround > 0 && gameState !== 'loading') {
+                const shadowScale = Math.max(0.2, 1 - (heightAboveGround / 600));
+                ctx.beginPath();
+                ctx.ellipse(ball.x, 835, ball.radius * 1.5 * shadowScale, ball.radius * 0.4 * shadowScale, 0, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                ctx.fill();
+            }
+
+            // 4. Dibujar a Foxito con sprites individuales
+            const fox = state.foxito;
+            let foxImg = foxIdleSprite;
+            let foxDrawScale = 1;
+            let birthdayElapsed = state.birthday.duration - state.birthday.timer;
+
+            if (state.birthday.active) {
+                if (birthdayElapsed < 700) {
+                    foxImg = foxBdayPopSprite;
+                    foxDrawScale = 1.24;
+                } else if (birthdayElapsed < 1450) {
+                    foxImg = foxBdayAfterPopSprite;
+                    foxDrawScale = 1.03;
+                } else if (birthdayElapsed < 2250) {
+                    foxImg = foxBdayHandsPopSprite;
+                    foxDrawScale = 1.03;
+                } else if (birthdayElapsed < 3550) {
+                    foxImg = foxBdayCelebrateSprite;
+                    foxDrawScale = 1.06;
+                } else {
+                    foxImg = foxBdayIdleSprite;
+                    foxDrawScale = 1.01;
+                }
+            } else if (state.birthday.unlocked) {
+                foxImg = foxBdayIdleSprite;
+                if (fox.state === 'anticipation') {
+                    foxImg = foxBdayPrepSprite;
+                } else if (fox.state === 'kicking' || fox.state === 'follow') {
+                    foxImg = foxBdayKickSprite;
+                }
+            } else {
+                if (fox.state === 'anticipation') {
+                    foxImg = foxPrepSprite;
+                } else if (fox.state === 'kicking' || fox.state === 'follow') {
+                    foxImg = foxKickSprite;
+                }
+            }
+
+            if (foxImg && foxImg.complete && foxImg.naturalWidth > 0) {
+                ctx.save();
+                let drawX = fox.x;
+                let drawY = fox.y;
+                if (!state.birthday.active && (fox.state === 'kicking' || fox.state === 'follow')) {
+                    drawX = fox.x - 10;
+                }
+                if (state.birthday.active) {
+                    if (birthdayElapsed >= 2250 && birthdayElapsed < 3550) {
+                        drawY = fox.y + 6;
+                    } else if (birthdayElapsed >= 3550) {
+                        drawY = fox.y + 2;
+                    }
+                }
+                const drawW = 250 * foxDrawScale;
+                const drawH = 250 * foxDrawScale;
+                ctx.translate(drawX, drawY);
+                ctx.drawImage(
+                    foxImg,
+                    -drawW / 2, -drawH, drawW, drawH
+                );
+                ctx.restore();
+            } else {
+                drawProceduralFoxito(ctx, fox, state.globalTime);
+            }
+
+            // 5. Estela de velocidad del balón
+            if (gameState === 'playing' && Math.abs(ball.vy) > 4) {
+                ctx.beginPath();
+                const tailGradient = ctx.createLinearGradient(ball.x, ball.y, ball.x, ball.y - ball.vy * 3);
+                tailGradient.addColorStop(0, state.difficulty.color + 'aa');
+                tailGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.strokeStyle = tailGradient;
+                ctx.lineWidth = ball.radius * 1.6;
+                ctx.lineCap = 'round';
+                ctx.moveTo(ball.x, ball.y);
+                ctx.lineTo(ball.x, ball.y - ball.vy * 2);
+                ctx.stroke();
+            }
+
+            // 6. Dibujar Balón
+            ctx.save();
+            ctx.translate(ball.x, ball.y);
+            ctx.rotate(ball.rotation);
+
+            if (ballSprite.complete && ballSprite.naturalWidth > 0) {
+                const size = ball.radius * 2.4;
+                ctx.drawImage(ballSprite, -size / 2, -size / 2, size, size);
+            } else {
+                const ballShade = ctx.createRadialGradient(-ball.radius*0.3, -ball.radius*0.3, 2, 0, 0, ball.radius);
+                ballShade.addColorStop(0, '#ffffff');
+                ballShade.addColorStop(0.85, '#f3f4f6');
+                ballShade.addColorStop(1, '#9ca3af');
+
+                ctx.beginPath();
+                ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
+                ctx.fillStyle = ballShade;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 3;
+                ctx.fill();
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // 7. Partículas
+            state.particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                
+                if (p.isConfetti) {
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation || 0);
+                    ctx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.66);
+                } else if (p.isStar) {
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        ctx.lineTo(
+                            p.x + Math.cos((18 + i * 72) * Math.PI / 180) * p.size,
+                            p.y - Math.sin((18 + i * 72) * Math.PI / 180) * p.size
+                        );
+                        ctx.lineTo(
+                            p.x + Math.cos((54 + i * 72) * Math.PI / 180) * (p.size/2),
+                            p.y - Math.sin((54 + i * 72) * Math.PI / 180) * (p.size/2)
+                        );
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            });
+
+            // 8. Textos Flotantes de precisión
+            state.floatingTexts.forEach(t => {
+                ctx.save();
+                ctx.globalAlpha = t.alpha;
+                ctx.fillStyle = t.color;
+                ctx.font = `bold ${t.size}px 'Arial Black', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowBlur = 5;
+                ctx.fillText(t.text, t.x, t.y);
+                ctx.restore();
+            });
+
+            drawBirthdayOverlay();
+
+            // 9. Marcador superior de juego en vivo
+            if (gameState === 'playing') {
+                ctx.save();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "bold 96px 'Impact', sans-serif";
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.strokeStyle = '#1e3a8a';
+                ctx.lineWidth = 10;
+                ctx.strokeText(score, state.width / 2, 80);
+                ctx.fillText(score, state.width / 2, 80);
+                ctx.restore();
+            }
+
+            ctx.restore();
+        }
+
+        // --- SISTEMA DE CONTROL DE TIEMPO / COLISIÓN ---
+        function handleKickAction() {
+            if (gameState === 'start') {
+                gameState = 'playing';
+                state.gameState = 'playing';
+                score = 0;
+                state.birthday.triggered = false;
+                state.birthday.unlocked = false;
+                state.birthday.active = false;
+                state.birthday.timer = 0;
+                state.birthday.secondPopPlayed = false;
+                state.birthday.secondPopPlayed = false;
+            state.birthday.extraConfettiPlayed = false;
+                updateDifficultyStats(0);
+                updateScreenUI();
+
+                // Lanzar el balón suavemente
+                state.ball.x = BALL_X;
+                state.ball.y = 220;
+                state.ball.vy = -4;
+                state.ball.omega = 0.1;
+                playSound('kick');
+                return;
+            }
+
+            if (gameState !== 'playing') return;
+            if (state.birthday.active) return;
+
+            const fox = state.foxito;
+
+            // Filtro anti-spam de patadas
+            if (fox.kickCooldown > 0) return;
+
+            // Iniciar animación del zorro
+            fox.state = 'anticipation';
+            fox.kickTimer = 260;
+            fox.kickCooldown = 330;
+
+            const ball = state.ball;
+            const kickZoneY = 705;
+            const ballFootDistance = Math.abs(ball.y - kickZoneY);
+
+            // Zona de golpe más cerca del pie de Foxito.
+            // Antes estaba demasiado arriba y permitía dominar el juego con timing muy temprano.
+            const maxAllowedDistance = Math.max(38, 68 - (score * 0.75));
+
+            if (ballFootDistance < maxAllowedDistance) {
+                // ¡Patada exitosa!
+                score += 1;
+                updateDifficultyStats(score);
+                playSound('kick');
+
+                if (score === 12 && !state.birthday.triggered) {
+                    triggerBirthdayCelebration();
+                }
+
+                // Clasificar toque y modificar el rebote según precisión.
+                // Perfecto: rebote alto y estable.
+                // Genial: rebote normal.
+                // Al límite: rebote más corto, obliga a reaccionar antes.
+                let feedbackText = '¡BIEN!';
+                let feedbackColor = '#00ffcc';
+                let particlesCount = 12;
+                let bounceMultiplier = 1.00;
+                let hitType = 'bien';
+
+                if (ballFootDistance < 15) {
+                    feedbackText = '¡PERFECTO!';
+                    feedbackColor = '#ffd700';
+                    particlesCount = 25;
+                    bounceMultiplier = 1.04;
+                    hitType = 'perfecto';
+                    state.screenShake = 16;
+                    createImpactParticles(ball.x, ball.y, '#ffd700', particlesCount, true);
+                } else if (ballFootDistance < 35) {
+                    feedbackText = '¡GENIAL!';
+                    feedbackColor = '#38bdf8';
+                    bounceMultiplier = 1.00;
+                    hitType = 'genial';
+                    state.screenShake = 6;
+                    createImpactParticles(ball.x, ball.y, '#38bdf8', particlesCount);
+                } else {
+                    feedbackText = '¡AL LÍMITE!';
+                    feedbackColor = '#f43f5e';
+                    bounceMultiplier = 0.86;
+                    hitType = 'limite';
+                    createImpactParticles(ball.x, ball.y, '#f43f5e', 8);
+                }
+
+                ball.vy = state.difficulty.targetVy * bounceMultiplier;
+                ball.omega = ball.vy * 0.014;
+
+                state.floatingTexts.push({
+                    text: feedbackText,
+                    x: ball.x,
+                    y: ball.y - 40,
+                    vy: -2,
+                    alpha: 1,
+                    size: feedbackText === '¡PERFECTO!' ? 36 : 26,
+                    color: feedbackColor
+                });
+            } else {
+                // Toque al aire fallido
+                playSound('whiff');
+                state.floatingTexts.push({
+                    text: '¡AL AIRE!',
+                    x: fox.x,
+                    y: fox.y - 170,
+                    vy: -1.5,
+                    alpha: 1,
+                    size: 24,
+                    color: '#94a3b8'
+                });
+            }
+        }
+
+        function createImpactParticles(x, y, color, count, isStar = false) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 2.5;
+                state.particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 1,
+                    gravity: 0.16,
+                    size: Math.random() * (isStar ? 9 : 4) + 3,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.03 + 0.02,
+                    isStar: isStar && Math.random() > 0.3
+                });
+            }
+        }
+
+        function triggerGameOver() {
+            gameState = 'gameover';
+            state.gameState = 'gameover';
+            state.screenShake = 12;
+            playSound('gameover');
+
+            // Actualizar récords en memoria local
+            if (score > highScore) {
+                highScore = score;
+                try {
+                    localStorage.setItem('foxito_high_score', highScore.toString());
+                } catch(e) {}
+                setTimeout(() => playSound('record'), 400);
+            }
+
+            updateScreenUI();
+        }
+
+        function restartGame() {
+            score = 0;
+            state.birthday.triggered = false;
+            state.birthday.unlocked = false;
+            state.birthday.active = false;
+            state.birthday.timer = 0;
+            state.birthday.extraConfettiPlayed = false;
+            updateDifficultyStats(0);
+
+            state.ball = {
+                x: BALL_X,
+                y: 120,
+                vx: 0,
+                vy: 0,
+                radius: 30,
+                rotation: 0,
+                omega: 0
+            };
+            state.particles = [];
+            state.floatingTexts = [];
+
+            gameState = 'playing';
+            state.gameState = 'playing';
+            updateScreenUI();
+
+            state.ball.vy = 3.5;
+            playSound('kick');
+        }
+
+        // --- MANEJO DE VISTAS HTML DE INTERFAZ ---
+        function updateScreenUI() {
+            // Ocultar todas las pantallas por defecto
+            screenStart.classList.add('hidden');
+            screenGameover.classList.add('hidden');
+            hudDifficulty.classList.add('hidden');
+
+            if (gameState === 'start') {
+                screenStart.classList.remove('hidden');
+                startHighScoreText.innerText = `${highScore} Toques`;
+            } else if (gameState === 'playing') {
+                hudDifficulty.classList.remove('hidden');
+            } else if (gameState === 'gameover') {
+                screenGameover.classList.remove('hidden');
+                finalScoreText.innerText = score;
+                finalHighScoreText.innerText = highScore;
+
+                if (score >= highScore && score > 0) {
+                    newRecordTag.classList.remove('hidden');
+                } else {
+                    newRecordTag.classList.add('hidden');
+                }
+            }
+        }
+
+        // --- CAPTURA DE INTERACCIONES Y EVENTOS ---
+        function handleInteraction(e) {
+            e.preventDefault();
+            initAudio();
+            handleKickAction();
+        }
+
+        canvas.addEventListener('mousedown', handleInteraction);
+        canvas.addEventListener('touchstart', handleInteraction);
+
+        screenStart.addEventListener('mousedown', handleInteraction);
+        screenStart.addEventListener('touchstart', handleInteraction);
+
+        // Bloqueo suave de accesos obvios. No es seguridad total, solo reduce la trampa casual.
+        window.addEventListener('contextmenu', (e) => e.preventDefault());
+        window.addEventListener('keydown', (e) => {
+            const key = (e.key || '').toLowerCase();
+            const blockedCombo = e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key)) ||
+                (e.metaKey && e.altKey && ['i', 'j', 'c'].includes(key)) ||
+                (e.ctrlKey && key === 'u') ||
+                (e.metaKey && key === 'u');
+
+            if (blockedCombo) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+
+        // Evento Tecla Espacio
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                initAudio();
+                if (gameState === 'playing' || gameState === 'start') {
+                    handleKickAction();
+                } else if (gameState === 'gameover') {
+                    restartGame();
+                }
+            }
+        });
+
+        // Eventos de botones
+        if (btnShowInstructions) {
+            btnShowInstructions.addEventListener('click', (e) => {
+                e.stopPropagation();
+                modalInstructions.classList.remove('hidden');
+            });
+        }
+
+        if (btnCloseInstructions) {
+            btnCloseInstructions.addEventListener('click', (e) => {
+                e.stopPropagation();
+                modalInstructions.classList.add('hidden');
+            });
+        }
+
+        if (btnRestart) {
+            btnRestart.addEventListener('click', (e) => {
+                e.stopPropagation();
+                restartGame();
+            });
+        }
+
+        if (btnMute) {
+            btnMute.addEventListener('click', (e) => {
+                e.stopPropagation();
+                soundEnabled = !soundEnabled;
+                if (soundEnabled) {
+                    svgSoundOn.classList.remove('hidden');
+                    svgSoundOff.classList.add('hidden');
+                } else {
+                    svgSoundOn.classList.add('hidden');
+                    svgSoundOff.classList.remove('hidden');
+                }
+            });
+        }
+
+        // --- BUCLE PRINCIPAL DE ANIMACIÓN ---
+        let lastFrameTime = performance.now();
+
+        function gameLoop(now) {
+            const rawDelta = now - lastFrameTime;
+            lastFrameTime = now;
+
+            const dtMs = Math.min(rawDelta, 50);
+            const dtScale = dtMs / 16.67;
+
+            updatePhysics(dtScale, dtMs);
+            drawGame();
+            requestAnimationFrame(gameLoop);
+        }
+
+        requestAnimationFrame(gameLoop);
+    
+        })();
+    </script>
+</body>
+</html>
