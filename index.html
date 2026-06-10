@@ -1885,8 +1885,9 @@ try {
     if (window.db) {
         addDoc(collection(db, "scores"), {
             player: "Camilo Piedrahita Lopez",
+            photo: "https://ca.slack-edge.com/TK3E9TUMC-U0648CWANSH-426cbf0e9e4a-512",
             score: score,
-            createdAt: new Date()
+            timestamp: Date.now()
         });
     }
 } catch (e) {
