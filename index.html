@@ -2036,5 +2036,29 @@
     
         })();
     </script>
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD8Mmvjm8OBc-ZoDcZ7jGvuTez9lc0ChuA",
+  authDomain: "fox-birthday-game.firebaseapp.com",
+  projectId: "fox-birthday-game",
+  storageBucket: "fox-birthday-game.firebasestorage.app",
+  messagingSenderId: "440806518997",
+  appId: "1:440806518997:web:588318536e475a9aabf25c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.db = db;
+window.addDoc = addDoc;
+window.collection = collection;
+</script>
 </body>
 </html>
