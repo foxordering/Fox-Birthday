@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦊</text></svg>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOX Birthday Rush</title>
+    <title>FOX Anniversary Rush</title>
     <!-- Google Fonts: Montserrat -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Tailwind CSS para el diseño premium de la interfaz -->
@@ -199,10 +199,10 @@
         <aside id="desktop-instructions" class="info-card rounded-[32px] p-6 md:p-7 space-y-5">
             <div class="space-y-3">
                 <span class="inline-flex items-center gap-2 text-white text-[11px] font-black tracking-widest px-4 py-1.5 rounded-full uppercase shadow" style="background:linear-gradient(135deg,#FA4B46,#ff7055);">
-                    🦊 Fox 12th Birthday
+                    🦊 Fox 12th Anniversary
                 </span>
                 <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter leading-none uppercase" style="color:#EFEFEF;">
-                    FOX Birthday Rush
+                    FOX Anniversary Rush
                 </h1>
                 <p class="text-sm md:text-base font-semibold leading-relaxed mb-2" style="color:#FA4B46;">
                     ¿Tienes lo necesario para llegar al primer lugar?
@@ -214,9 +214,8 @@
                 <img id="aside-player-avatar" src="" alt="" class="w-10 h-10 rounded-lg object-cover" style="border:2px solid #FA4B46;">
                 <div>
                     <div class="text-[10px] font-bold uppercase tracking-widest" style="color:#FA4B46;">Jugando como</div>
-                    <div id="aside-player-name" class="text-sm font-black" style="color:#EFEFEF;"></div>
+                    <div id="aside-player-name" class="text-sm font-extrabold" style="color:#EFEFEF;"></div>
                 </div>
-                <button id="aside-change-player" class="ml-auto text-[10px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-lg transition" style="color:#FA4B46;border:1px solid rgba(250,75,70,.3);">Cambiar</button>
             </div>
 
             <div class="grid gap-3 text-sm">
@@ -252,7 +251,7 @@
                 <div class="w-20 h-20 rounded-full animate-spin" style="border:4px solid #FA4B46;border-top-color:transparent;"></div>
                 <div class="absolute inset-0 flex items-center justify-center text-xl font-bold">🦊</div>
             </div>
-            <h2 class="text-xl font-extrabold tracking-wider" style="color:#FA4B46;">FOX BIRTHDAY RUSH</h2>
+            <h2 class="text-xl font-extrabold tracking-wider" style="color:#FA4B46;">FOX ANNIVERSARY RUSH</h2>
             <p class="text-sm mt-2" style="color:rgba(239,239,239,.5);">Construyendo el estadio y preparando animaciones...</p>
         </div>
 
@@ -274,7 +273,7 @@
         <div id="screen-start" class="hidden absolute inset-0 flex flex-col items-center justify-between py-16 px-6 z-20 cursor-pointer animate-fade-in text-center" style="background:rgba(0,17,40,.65);">
             <div class="space-y-2 mt-4">
                 <h1 class="text-5xl font-extrabold tracking-tighter text-white drop-shadow-lg uppercase mt-2">
-                    FOX BIRTHDAY RUSH
+                    FOX ANNIVERSARY RUSH
                 </h1>
                 <p class="text-sm max-w-xs mx-auto mt-2 font-semibold" style="color:rgba(239,239,239,.8);">
                     Mantén el balón en el aire y celebra los 12 años de FOX. Haz clic o pulsa la pantalla cuando el balón baje a la altura de los botines de FOX.
@@ -435,7 +434,7 @@
     ══════════════════════════════════════════════ -->
     <script>
     // ── DATOS DE EMPLEADOS ──
-    const EMPLOYEES = [
+    const EMPLOYEES_FALLBACK = [
       {name:"Jairo Enrique Pico Morales",photo:"https://ca.slack-edge.com/TK3E9TUMC-U013TAB02K1-9620f6100630-512"},
       {name:"Juan Sebastian Pico",photo:"https://ca.slack-edge.com/TK3E9TUMC-U01K67XHVU0-50bbbc006873-512"},
       {name:"Jackeline Carolina Gracey Sanmiguel",photo:"https://ca.slack-edge.com/TK3E9TUMC-U028YN2DN3E-0e548fe7e35b-512"},
@@ -682,10 +681,23 @@
       {name:"Karen Yulieth Cortes Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B1FF0CBQD-a1c11b8ab3a9-512"},
       {name:"Luis David Parra Valencia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B0JGDDLG0-85d1cf380329-512"},
       {name:"Margareth Duran Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B4EAMF1D5-20db1b58ea01-512"},
-      {name:"Pedro Antonio Guerrido Peña",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B1CFQB7DZ-ceb8e52e293d-512"},
-      {name:"Tomas Ricardo Llorente Espitia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ATRCDDUCD-e7c3f7df812f-512"},
-      {name:"Viviana Millan Constain",photo:"https://ca.slack-edge.com/TK3E9TUMC-U042EQ8984S-3583680abf8a-512"}
-    ];
+    // ── EMPLEADOS: hardcoded como fallback, se sobreescriben desde Sheets ──
+    let EMPLOYEES = [...EMPLOYEES_FALLBACK]; // mostrar inmediatamente mientras carga
+
+    async function fetchEmpleados() {
+        try {
+            const res = await fetch(`${SHEET_URL}?action=empleados`);
+            const json = await res.json();
+            if (json.ok && Array.isArray(json.data) && json.data.length > 0) {
+                EMPLOYEES = json.data;
+                return true;
+            }
+        } catch(e) {
+            console.warn('No se pudo cargar la lista de empleados desde Sheets, usando fallback local.');
+        }
+        // Si falla, EMPLOYEES ya tiene el fallback hardcodeado
+        return false;
+    }
 
     // ── ESTADO DEL JUGADOR ACTUAL ──
     let currentPlayer = null;  // { name, photo }
@@ -694,7 +706,7 @@
     //  CONFIGURACIÓN GOOGLE SHEETS
     //  👉 Pega aquí la URL de tu Apps Script después de publicarlo
     // ════════════════════════════════════════════════════════
-    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyGjkhvA75dicV3hfUKyNhLYNDztXJpvALB3RWxHq0nia4_8GrnEHV4qdrmw-m7ReB5pw/exec';
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycby3NIQ4U-Cb6cuimC1wViNlDoVW-I1pVWbB1yhYDEPGgrmn68f91SBLUCmIhS23z0DxPQ/exec';
 
     const PLAYER_KEY = 'foxito_current_player';
 
@@ -886,34 +898,36 @@
 
     // ── BOTÓN CAMBIAR JUGADOR ──
     document.addEventListener('DOMContentLoaded', function() {
-        const changeBtn = document.getElementById('aside-change-player');
-        if (changeBtn) {
-            changeBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                document.getElementById('player-search-input').value = '';
-                renderPlayerList(EMPLOYEES);
-                document.getElementById('modal-player-select').classList.remove('hidden');
-            });
-        }
-    });
 
-    // ── INIT: cargar leaderboard y verificar jugador guardado ──
+    // ── INIT: cargar empleados + leaderboard al arrancar ──
     (async function initPlayer() {
-        // Cargar leaderboard desde Sheets en segundo plano
+        // Cargar leaderboard en segundo plano
         fetchLeaderboard(true).then(() => renderAllLeaderboards());
 
+        // Verificar si ya hay jugador guardado
+        let savedPlayer = null;
         try {
-            const saved = JSON.parse(localStorage.getItem(PLAYER_KEY) || 'null');
-            if (saved && saved.name && saved.photo) {
-                const found = EMPLOYEES.find(e => e.name === saved.name);
-                if (found) {
-                    selectPlayer(found.name, found.photo);
-                    return;
-                }
-            }
+            savedPlayer = JSON.parse(localStorage.getItem(PLAYER_KEY) || 'null');
         } catch(e) {}
-        // Mostrar modal de selección
+
+        // Si hay jugador guardado, entrar directo (con datos del fallback)
+        if (savedPlayer && savedPlayer.name) {
+            const found = EMPLOYEES.find(e => e.name === savedPlayer.name);
+            if (found) {
+                selectPlayer(found.name, found.photo);
+                // Igual cargar Sheets en background por si cambió la foto
+                fetchEmpleados();
+                return;
+            }
+        }
+
+        // Mostrar lista inmediatamente con fallback
         renderPlayerList(EMPLOYEES);
+
+        // Intentar actualizar desde Sheets en background
+        fetchEmpleados().then(loaded => {
+            if (loaded) renderPlayerList(EMPLOYEES); // refrescar si llegaron datos de Sheets
+        });
     })();
 
     // Refrescar leaderboard automáticamente cada 30s mientras la página está abierta
@@ -981,10 +995,10 @@
         const foxBdayHandsPopSprite = new Image();
         const foxBdayCelebrateSprite = new Image();
         const ballSprite = new Image();
-        const birthdayCrowdAudio = new Audio();
-        birthdayCrowdAudio.preload = 'auto';
-        birthdayCrowdAudio.src = 'assets/birthday_cheer.mp3';
-        birthdayCrowdAudio.volume = 0.72;
+        const anniversaryCrowdAudio = new Audio();
+        anniversaryCrowdAudio.preload = 'auto';
+        anniversaryCrowdAudio.src = 'assets/anniversary_cheer.mp3';
+        anniversaryCrowdAudio.volume = 0.72;
         const BALL_X = 330;
 
         // Referencias para el bucle y la física
@@ -1031,7 +1045,7 @@
             width: 540,
             height: 960,
             scale: 1,
-            birthday: {
+            anniversary: {
                 triggered: false,
                 unlocked: false,
                 active: false,
@@ -1058,12 +1072,12 @@
             }
         }
 
-        function playBirthdayCrowdAudio() {
+        function playAnniversaryCrowdAudio() {
             if (!soundEnabled) return;
             try {
-                birthdayCrowdAudio.pause();
-                birthdayCrowdAudio.currentTime = 0;
-                const p = birthdayCrowdAudio.play();
+                anniversaryCrowdAudio.pause();
+                anniversaryCrowdAudio.currentTime = 0;
+                const p = anniversaryCrowdAudio.play();
                 if (p && typeof p.catch === 'function') p.catch(() => {});
             } catch (e) {
                 console.warn('No se pudo reproducir el audio de celebración:', e);
@@ -1199,7 +1213,7 @@
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.13);
                     osc.start(now);
                     osc.stop(now + 0.13);
-                } else if (type === 'birthday') {
+                } else if (type === 'anniversary') {
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(523.25, now);
                     osc.frequency.setValueAtTime(659.25, now + 0.09);
@@ -1286,7 +1300,7 @@
             'assets/foxito_bday_idle.png',
             'foxito_bday_idle.png'
         ], (success) => {
-            if (!success) console.warn("No se pudo cargar el sprite birthday idle de Foxito.");
+            if (!success) console.warn("No se pudo cargar el sprite anniversary idle de Foxito.");
             checkAllLoaded();
         });
 
@@ -1294,7 +1308,7 @@
             'assets/foxito_bday_prep.png',
             'foxito_bday_prep.png'
         ], (success) => {
-            if (!success) console.warn("No se pudo cargar el sprite birthday prep de Foxito.");
+            if (!success) console.warn("No se pudo cargar el sprite anniversary prep de Foxito.");
             checkAllLoaded();
         });
 
@@ -1302,7 +1316,7 @@
             'assets/foxito_bday_kick.png',
             'foxito_bday_kick.png'
         ], (success) => {
-            if (!success) console.warn("No se pudo cargar el sprite birthday kick de Foxito.");
+            if (!success) console.warn("No se pudo cargar el sprite anniversary kick de Foxito.");
             checkAllLoaded();
         });
 
@@ -1836,8 +1850,8 @@
 
 
         // --- EVENTO ESPECIAL DE CUMPLEAÑOS AL LLEGAR A 12 ---
-        function triggerBirthdayCelebration() {
-            const bday = state.birthday;
+        function triggerAnniversaryCelebration() {
+            const bday = state.anniversary;
             if (bday.triggered) return;
 
             bday.triggered = true;
@@ -1859,11 +1873,11 @@
             state.foxito.state = 'idle';
             state.screenShake = 10;
 
-            createBirthdayConfetti();
+            createAnniversaryConfetti();
         }
 
-        function updateBirthdayCelebration(dtScale, dtMs) {
-            const bday = state.birthday;
+        function updateAnniversaryCelebration(dtScale, dtMs) {
+            const bday = state.anniversary;
             const elapsed = bday.duration - bday.timer;
 
             if (!bday.popPlayed) {
@@ -1877,13 +1891,13 @@
             }
 
             if (elapsed > 2250 && !bday.partyPlayed) {
-                playSound('birthday');
-                setTimeout(() => playBirthdayCrowdAudio(), 80);
+                playSound('anniversary');
+                setTimeout(() => playAnniversaryCrowdAudio(), 80);
                 bday.partyPlayed = true;
             }
 
             if (elapsed > 2450 && !bday.extraConfettiPlayed) {
-                createBirthdayConfetti(90, true);
+                createAnniversaryConfetti(90, true);
                 bday.extraConfettiPlayed = true;
             }
 
@@ -1917,7 +1931,7 @@
             }
         }
 
-        function createBirthdayConfetti(amount = 160, burst = false) {
+        function createAnniversaryConfetti(amount = 160, burst = false) {
             const colors = ['#f97316', '#facc15', '#38bdf8', '#22c55e', '#ef4444', '#ffffff', '#fb7185'];
 
             for (let i = 0; i < amount; i++) {
@@ -1956,19 +1970,19 @@
             }
 
             state.floatingTexts.push({
-                text: 'Happy 12th Birthday FOX',
+                text: 'Happy 12th Anniversary FOX',
                 x: state.width / 2,
                 y: 350,
                 vy: -0.08,
                 alpha: 1,
                 size: 40,
                 color: '#facc15',
-                isBirthdayText: true
+                isAnniversaryText: true
             });
         }
 
-        function drawBirthdayOverlay() {
-            const bday = state.birthday;
+        function drawAnniversaryOverlay() {
+            const bday = state.anniversary;
             if (!bday.active) return;
 
             const elapsed = bday.duration - bday.timer;
@@ -2033,8 +2047,8 @@
                 ctx.fillText('Happy 12th', 0, 0);
 
                 ctx.font = "900 42px 'Montserrat', 'Arial Black', Impact, sans-serif";
-                ctx.strokeText('Birthday Fox', 0, 48);
-                ctx.fillText('Birthday Fox', 0, 48);
+                ctx.strokeText('Anniversary Fox', 0, 48);
+                ctx.fillText('Anniversary Fox', 0, 48);
 
                 ctx.font = "800 18px system-ui, sans-serif";
                 ctx.lineWidth = 5;
@@ -2079,8 +2093,8 @@
 
             if (gameState !== 'playing') return;
 
-            if (state.birthday.active) {
-                updateBirthdayCelebration(dtScale, dtMs);
+            if (state.anniversary.active) {
+                updateAnniversaryCelebration(dtScale, dtMs);
                 return;
             }
 
@@ -2195,26 +2209,26 @@
             const fox = state.foxito;
             let foxImg = foxIdleSprite;
             let foxDrawScale = 1;
-            let birthdayElapsed = state.birthday.duration - state.birthday.timer;
+            let anniversaryElapsed = state.anniversary.duration - state.anniversary.timer;
 
-            if (state.birthday.active) {
-                if (birthdayElapsed < 700) {
+            if (state.anniversary.active) {
+                if (anniversaryElapsed < 700) {
                     foxImg = foxBdayPopSprite;
                     foxDrawScale = 1.24;
-                } else if (birthdayElapsed < 1450) {
+                } else if (anniversaryElapsed < 1450) {
                     foxImg = foxBdayAfterPopSprite;
                     foxDrawScale = 1.03;
-                } else if (birthdayElapsed < 2250) {
+                } else if (anniversaryElapsed < 2250) {
                     foxImg = foxBdayHandsPopSprite;
                     foxDrawScale = 1.03;
-                } else if (birthdayElapsed < 3550) {
+                } else if (anniversaryElapsed < 3550) {
                     foxImg = foxBdayCelebrateSprite;
                     foxDrawScale = 1.06;
                 } else {
                     foxImg = foxBdayIdleSprite;
                     foxDrawScale = 1.01;
                 }
-            } else if (state.birthday.unlocked) {
+            } else if (state.anniversary.unlocked) {
                 foxImg = foxBdayIdleSprite;
                 if (fox.state === 'anticipation') {
                     foxImg = foxBdayPrepSprite;
@@ -2233,13 +2247,13 @@
                 ctx.save();
                 let drawX = fox.x;
                 let drawY = fox.y;
-                if (!state.birthday.active && (fox.state === 'kicking' || fox.state === 'follow')) {
+                if (!state.anniversary.active && (fox.state === 'kicking' || fox.state === 'follow')) {
                     drawX = fox.x - 10;
                 }
-                if (state.birthday.active) {
-                    if (birthdayElapsed >= 2250 && birthdayElapsed < 3550) {
+                if (state.anniversary.active) {
+                    if (anniversaryElapsed >= 2250 && anniversaryElapsed < 3550) {
                         drawY = fox.y + 6;
-                    } else if (birthdayElapsed >= 3550) {
+                    } else if (anniversaryElapsed >= 3550) {
                         drawY = fox.y + 2;
                     }
                 }
@@ -2338,7 +2352,7 @@
                 ctx.restore();
             });
 
-            drawBirthdayOverlay();
+            drawAnniversaryOverlay();
 
             // 9. Marcador superior de juego en vivo
             if (gameState === 'playing') {
@@ -2363,13 +2377,13 @@
                 gameState = 'playing';
                 state.gameState = 'playing';
                 score = 0;
-                state.birthday.triggered = false;
-                state.birthday.unlocked = false;
-                state.birthday.active = false;
-                state.birthday.timer = 0;
-                state.birthday.secondPopPlayed = false;
-                state.birthday.secondPopPlayed = false;
-            state.birthday.extraConfettiPlayed = false;
+                state.anniversary.triggered = false;
+                state.anniversary.unlocked = false;
+                state.anniversary.active = false;
+                state.anniversary.timer = 0;
+                state.anniversary.secondPopPlayed = false;
+                state.anniversary.secondPopPlayed = false;
+            state.anniversary.extraConfettiPlayed = false;
                 updateDifficultyStats(0);
                 updateScreenUI();
 
@@ -2383,7 +2397,7 @@
             }
 
             if (gameState !== 'playing') return;
-            if (state.birthday.active) return;
+            if (state.anniversary.active) return;
 
             const fox = state.foxito;
 
@@ -2409,8 +2423,8 @@
                 updateDifficultyStats(score);
                 playSound('kick');
 
-                if (score === 12 && !state.birthday.triggered) {
-                    triggerBirthdayCelebration();
+                if (score === 12 && !state.anniversary.triggered) {
+                    triggerAnniversaryCelebration();
                 }
 
                 // Clasificar toque y modificar el rebote según precisión.
@@ -2517,11 +2531,11 @@
 
         function restartGame() {
             score = 0;
-            state.birthday.triggered = false;
-            state.birthday.unlocked = false;
-            state.birthday.active = false;
-            state.birthday.timer = 0;
-            state.birthday.extraConfettiPlayed = false;
+            state.anniversary.triggered = false;
+            state.anniversary.unlocked = false;
+            state.anniversary.active = false;
+            state.anniversary.timer = 0;
+            state.anniversary.extraConfettiPlayed = false;
             updateDifficultyStats(0);
 
             state.ball = {
