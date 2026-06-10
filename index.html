@@ -4,29 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foxito Birthday Rush</title>
+    <!-- Google Fonts: Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Tailwind CSS para el diseño premium de la interfaz -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* ── FOX BRAND COLORS ── */
+        :root {
+            --fox-dark:   #001128;
+            --fox-red:    #FA4B46;
+            --fox-light:  #EFEFEF;
+        }
+
+        /* Montserrat everywhere */
+        * { font-family: 'Montserrat', sans-serif !important; }
+
         /* Animaciones personalizadas para una experiencia suave */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(32px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
+        @keyframes barGrow {
+            from { width: 0; }
+            to   { width: var(--bar-w); }
+        }
+        .animate-fade-in  { animation: fadeIn  0.3s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.4s ease-out forwards; }
+
         /* Eliminar selección de texto molesta al jugar en móviles */
         * {
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             outline: none;
+        }
+
+        /* Modales SIEMPRE pueden recibir clics */
+        .modal-overlay,
+        .modal-overlay * {
+            user-select: auto !important;
+            pointer-events: auto !important;
+        }
+
+        /* Quitar letter-spacing exagerado de títulos en mayúsculas */
+        .tracking-widest { letter-spacing: 0.05em !important; }
+        h1, h2, h3 { letter-spacing: -0.01em; }
 
         /* Layout horizontal para desktop y responsive para celular */
         body {
             background:
-                radial-gradient(circle at top left, rgba(249, 115, 22, 0.22), transparent 34%),
-                radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.20), transparent 30%),
-                #020617;
+                radial-gradient(circle at top left,  rgba(250,75,70,.18), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(0,17,40,.85), transparent 30%),
+                #001128;
         }
 
         #app-shell {
@@ -54,11 +86,55 @@
         }
 
         .info-card {
-            background: rgba(15, 23, 42, 0.72);
-            border: 1px solid rgba(255, 255, 255, 0.10);
-            box-shadow: 0 20px 60px rgba(0,0,0,.28);
+            background: rgba(0, 17, 40, 0.82);
+            border: 1px solid rgba(250, 75, 70, 0.22);
+            box-shadow: 0 20px 60px rgba(0,0,0,.40);
             backdrop-filter: blur(14px);
         }
+
+        /* ── LEADERBOARD BARS ── */
+        .lb-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .lb-rank { width:22px;text-align:right;font-weight:900;font-size:12px;color:var(--fox-light);opacity:.55;flex-shrink:0; }
+        .lb-rank.gold   { color:#FFD700;opacity:1; }
+        .lb-rank.silver { color:#C0C0C0;opacity:1; }
+        .lb-rank.bronze { color:#CD7F32;opacity:1; }
+        .lb-bar { flex:1;height:40px;border-radius:10px;background:rgba(250,75,70,.12);border:1px solid rgba(250,75,70,.25);position:relative;overflow:hidden;display:flex;align-items:center; }
+        .lb-bar-fill { position:absolute;left:0;top:0;bottom:0;border-radius:10px;background:linear-gradient(90deg,#FA4B46 0%,#ff7b57 100%);animation:barGrow .6s ease-out forwards;width:var(--bar-w); }
+        .lb-bar-fill.gold   { background:linear-gradient(90deg,#b8860b,#FFD700); }
+        .lb-bar-fill.silver { background:linear-gradient(90deg,#708090,#C0C0C0); }
+        .lb-bar-fill.bronze { background:linear-gradient(90deg,#8B4513,#CD7F32); }
+        .lb-avatar { position:relative;z-index:2;width:30px;height:30px;border-radius:6px;margin-left:5px;border:2px solid rgba(255,255,255,.35);object-fit:cover;flex-shrink:0;background:#001128; }
+        .lb-name { position:relative;z-index:2;font-size:11px;font-weight:700;color:#fff;margin-left:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px; }
+        .lb-score { position:relative;z-index:2;margin-left:auto;margin-right:8px;font-size:13px;font-weight:900;color:#fff;flex-shrink:0; }
+
+        /* Modals */
+        .modal-overlay { position:fixed;inset:0;background:rgba(0,17,40,.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:auto !important; }
+        .modal-box { background:#001128;border:1px solid rgba(250,75,70,.4);border-radius:24px;padding:28px 24px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;pointer-events:auto !important; }
+
+        /* Player selector */
+        .player-search { width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(250,75,70,.3);border-radius:12px;padding:10px 14px;color:#fff;font-size:14px;font-weight:600;margin-bottom:12px;pointer-events:auto;cursor:text; }
+        .player-search::placeholder { color:rgba(255,255,255,.35); }
+        .player-search:focus { border-color:#FA4B46;outline:none; }
+        .player-list { max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;pointer-events:auto; }
+        .player-list::-webkit-scrollbar { width:4px; }
+        .player-list::-webkit-scrollbar-thumb { background:#FA4B46;border-radius:4px; }
+        .player-item { display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer !important;border:1px solid transparent;transition:all .15s;pointer-events:auto !important; }
+        .player-item:hover { background:rgba(250,75,70,.15);border-color:rgba(250,75,70,.3); }
+        .player-item img { width:36px;height:36px;border-radius:8px;object-fit:cover;background:#001128;flex-shrink:0;pointer-events:none; }
+        .player-item span { font-size:13px;font-weight:600;color:#EFEFEF;pointer-events:none; }
+
+        /* Buttons */
+        .btn-fox { background:linear-gradient(135deg,#FA4B46 0%,#ff7055 100%);color:#fff;font-weight:900;border-radius:14px;padding:14px 24px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;transition:transform .1s,box-shadow .1s;border:none;cursor:pointer;width:100%;box-shadow:0 6px 24px rgba(250,75,70,.35); }
+        .btn-fox:hover { transform:translateY(-1px);box-shadow:0 10px 30px rgba(250,75,70,.45); }
+        .btn-fox:active { transform:scale(.97); }
+
+        #btn-ranking { position:absolute;top:14px;right:52px;z-index:40;background:rgba(250,75,70,.85);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:800;color:#fff;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;transition:background .15s; }
+        #btn-ranking:hover { background:#FA4B46; }
 
         @media (max-width: 900px), (orientation: portrait) {
             body {
@@ -114,167 +190,172 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-white font-sans min-h-screen overflow-x-hidden">
+<body class="text-white min-h-screen overflow-x-hidden" style="background:#001128;font-family:'Montserrat',sans-serif;">
 
 
     <main id="app-shell">
 
         <aside id="desktop-instructions" class="info-card rounded-[32px] p-6 md:p-7 space-y-5">
             <div class="space-y-3">
-                <span class="inline-flex bg-gradient-to-r from-orange-500 to-amber-400 text-white text-[11px] font-black tracking-widest px-4 py-1.5 rounded-full uppercase shadow">
-                    Fox 12th Birthday
+                <span class="inline-flex items-center gap-2 text-white text-[11px] font-black tracking-widest px-4 py-1.5 rounded-full uppercase shadow" style="background:linear-gradient(135deg,#FA4B46,#ff7055);">
+                    🦊 Fox 12th Birthday
                 </span>
-                <h1 class="text-4xl md:text-5xl font-black tracking-tighter leading-none uppercase">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tighter leading-none uppercase" style="color:#EFEFEF;">
                     Foxito Birthday Rush
                 </h1>
-                <p class="text-orange-300 text-sm md:text-base font-semibold leading-relaxed mb-2">
+                <p class="text-sm md:text-base font-semibold leading-relaxed mb-2" style="color:#FA4B46;">
                     ¿Tienes lo necesario para llegar al primer lugar?
                 </p>
             </div>
 
+            <!-- Current player display -->
+            <div id="aside-player-info" class="hidden rounded-2xl p-3 border flex items-center gap-3" style="background:rgba(250,75,70,.08);border-color:rgba(250,75,70,.25);">
+                <img id="aside-player-avatar" src="" alt="" class="w-10 h-10 rounded-lg object-cover" style="border:2px solid #FA4B46;">
+                <div>
+                    <div class="text-[10px] font-bold uppercase tracking-widest" style="color:#FA4B46;">Jugando como</div>
+                    <div id="aside-player-name" class="text-sm font-black" style="color:#EFEFEF;"></div>
+                </div>
+                <button id="aside-change-player" class="ml-auto text-[10px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-lg transition" style="color:#FA4B46;border:1px solid rgba(250,75,70,.3);">Cambiar</button>
+            </div>
+
             <div class="grid gap-3 text-sm">
-                <div class="bg-black/35 rounded-2xl p-4 border border-white/10">
-                    <h2 class="font-black uppercase text-orange-300 text-xs tracking-widest mb-2">Cómo jugar</h2>
-                    <p class="text-slate-300 leading-relaxed">
+                <div class="rounded-2xl p-4 border" style="background:rgba(0,0,0,.35);border-color:rgba(250,75,70,.15);">
+                    <h2 class="font-black uppercase text-xs tracking-widest mb-2" style="color:#FA4B46;">Cómo jugar</h2>
+                    <p class="leading-relaxed" style="color:#EFEFEF;opacity:.8;">
                         Haz clic, toca la pantalla o presiona espacio cuando el balón baje a la zona de golpe.
                     </p>
                 </div>
-
-
-                <div class="bg-black/35 rounded-2xl p-4 border border-white/10 mobile-hide">
-                    <h2 class="font-black uppercase text-yellow-300 text-xs tracking-widest mb-2">Pro tip:</h2>
-                    <p class="text-slate-300 leading-relaxed">
+                <div class="rounded-2xl p-4 border mobile-hide" style="background:rgba(0,0,0,.35);border-color:rgba(250,75,70,.15);">
+                    <h2 class="font-black uppercase text-xs tracking-widest mb-2" style="color:#FFD700;">⚡ Pro tip:</h2>
+                    <p class="leading-relaxed" style="color:#EFEFEF;opacity:.8;">
                         El juego sube la dificultad poco a poco. No presiones la pantalla sin parar, calcula tus jugadas.
                     </p>
+                </div>
+            </div>
+
+            <!-- Leaderboard aside -->
+            <div>
+                <h2 class="font-black uppercase text-xs tracking-widest mb-3" style="color:#FA4B46;">🏆 Ranking</h2>
+                <div id="aside-leaderboard" class="space-y-0">
+                    <p class="text-xs font-semibold" style="color:rgba(255,255,255,.35);">Aún no hay puntajes. ¡Juega primero!</p>
                 </div>
             </div>
         </aside>
 
         <!-- Contenedor del Dispositivo Móvil Físico (Proporción vertical 9:16) -->
-    <div id="container" class="relative w-full h-full max-w-[540px] max-h-[960px] md:h-[92vh] md:w-[51.75vh] flex items-center justify-center bg-black md:rounded-[40px] md:shadow-2xl md:border-[12px] md:border-slate-800 overflow-hidden">
+    <div id="container" class="relative w-full h-full max-w-[540px] max-h-[960px] md:h-[92vh] md:w-[51.75vh] flex items-center justify-center bg-black md:rounded-[40px] md:shadow-2xl md:border-[12px] overflow-hidden" style="border-color:#001128;">
         
         <!-- PANTALLA DE CARGA -->
-        <div id="screen-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 z-50 text-center px-6">
+        <div id="screen-loading" class="absolute inset-0 flex flex-col items-center justify-center z-50 text-center px-6" style="background:#001128;">
             <div class="relative mb-6">
-                <div class="w-20 h-20 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="w-20 h-20 rounded-full animate-spin" style="border:4px solid #FA4B46;border-top-color:transparent;"></div>
                 <div class="absolute inset-0 flex items-center justify-center text-xl font-bold">🦊</div>
             </div>
-            <h2 class="text-xl font-black text-orange-400 tracking-wider">FOXITO BIRTHDAY RUSH</h2>
-            <p class="text-slate-400 text-sm mt-2">Construyendo el estadio y preparando animaciones...</p>
+            <h2 class="text-xl font-black tracking-wider" style="color:#FA4B46;">FOXITO BIRTHDAY RUSH</h2>
+            <p class="text-sm mt-2" style="color:rgba(239,239,239,.5);">Construyendo el estadio y preparando animaciones...</p>
         </div>
 
         <!-- CANVAS PRINCIPAL DEL JUEGO -->
         <canvas id="gameCanvas" class="block w-full h-full cursor-pointer"></canvas>
 
+        <!-- BOTÓN VER RANKING -->
+        <button id="btn-ranking" onclick="openRanking()">🏆 Ranking</button>
+
         <!-- INDICADOR DE DIFICULTAD ACTIVA (ESQUINA SUPERIOR IZQUIERDA) -->
-        <div id="hud-difficulty" class="hidden absolute top-4 left-4 z-40 bg-black/60 border border-white/10 px-3 py-1.5 rounded-full flex items-center space-x-2 shadow-md">
+        <div id="hud-difficulty" class="hidden absolute top-4 left-4 z-40 px-3 py-1.5 rounded-full flex items-center space-x-2 shadow-md" style="background:rgba(0,17,40,.75);border:1px solid rgba(250,75,70,.25);">
             <span id="difficulty-dot" class="w-2.5 h-2.5 rounded-full animate-pulse"></span>
-            <span class="text-[11px] font-black tracking-wide uppercase text-slate-300">
+            <span class="text-[11px] font-black tracking-wide uppercase" style="color:#EFEFEF;">
                 Nivel: <span id="difficulty-label">PRINCIPIANTE</span>
             </span>
         </div>
 
         <!-- PANTALLA DE INICIO (TOUCH TO KICK) -->
-        <div id="screen-start" class="hidden absolute inset-0 bg-black/60 flex flex-col items-center justify-between py-16 px-6 z-20 cursor-pointer animate-fade-in text-center">
+        <div id="screen-start" class="hidden absolute inset-0 flex flex-col items-center justify-between py-16 px-6 z-20 cursor-pointer animate-fade-in text-center" style="background:rgba(0,17,40,.65);">
             <div class="space-y-2 mt-4">
-<h1 class="text-5xl font-black tracking-tighter text-white drop-shadow-lg uppercase mt-2">
+                <h1 class="text-5xl font-black tracking-tighter text-white drop-shadow-lg uppercase mt-2">
                     FOXITO BIRTHDAY RUSH
                 </h1>
-                <p class="text-slate-200 text-sm max-w-xs mx-auto mt-2 font-medium">
+                <p class="text-sm max-w-xs mx-auto mt-2 font-semibold" style="color:rgba(239,239,239,.8);">
                     Mantén el balón en el aire y celebra los 12 años de Fox. Haz clic o pulsa la pantalla cuando el balón baje a la altura de los botines de Foxito.
                 </p>
-                <div class="mt-6 flex flex-col items-center gap-3">
-    
-    <img
-        id="player-photo"
-        src="https://ca.slack-edge.com/TK3E9TUMC-U0648CWANSH-426cbf0e9e4a-512"
-        class="w-24 h-24 rounded-full border-4 border-orange-500"
-    />
-
-    <select
-        id="player-select"
-        class="px-4 py-2 rounded-lg text-black font-medium"
-    >
-        <option value="Camilo Piedrahita Lopez">
-            Camilo Piedrahita Lopez
-        </option>
-    </select>
             </div>
 
             <div class="flex flex-col items-center space-y-4">
                 <div class="animate-bounce flex flex-col items-center">
-                    <span class="text-white text-lg font-black bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 rounded-full shadow-2xl border-2 border-white/20 uppercase tracking-widest">
+                    <span class="text-white text-lg font-black px-8 py-4 rounded-full shadow-2xl uppercase" style="background:linear-gradient(135deg,#FA4B46,#ff7055);border:2px solid rgba(255,255,255,.2);letter-spacing:0.03em;">
                         ⚽ ¡Clic para Iniciar!
                     </span>
                 </div>
-                <span class="text-slate-400 text-xs font-medium">O presiona la tecla <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded font-mono">Espacio</span></span>
+                <span class="text-xs font-medium" style="color:rgba(255,255,255,.4);">O presiona la tecla <span class="px-2 py-0.5 rounded font-mono" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);">Espacio</span></span>
             </div>
 
             <div class="space-y-3 w-full max-w-[280px]">
-                <div class="bg-black/70 px-6 py-3 rounded-2xl border border-white/10 flex justify-between items-center">
-                    <span class="text-xs text-slate-400 uppercase tracking-wider font-bold">Mejor Récord</span>
-                    <span id="start-high-score" class="text-2xl font-black text-yellow-400 font-mono">0 Toques</span>
+                <div class="px-6 py-3 rounded-2xl flex justify-between items-center" style="background:rgba(0,0,0,.6);border:1px solid rgba(250,75,70,.2);">
+                    <span class="text-xs uppercase tracking-wider font-bold" style="color:rgba(255,255,255,.5);">Mejor Récord</span>
+                    <span id="start-high-score" class="text-2xl font-black font-mono" style="color:#FFD700;">0 Toques</span>
                 </div>
-</div>
+            </div>
         </div>
 
         <!-- PANTALLA DE GAME OVER -->
-        <div id="screen-gameover" class="hidden absolute inset-0 bg-black/85 flex flex-col items-center justify-center px-6 z-30 text-center animate-fade-in">
-            <div class="bg-slate-900 border-2 border-slate-800 rounded-[32px] p-8 max-w-xs w-full shadow-2xl space-y-6">
+        <div id="screen-gameover" class="hidden absolute inset-0 flex flex-col items-center justify-center px-6 z-30 text-center animate-fade-in" style="background:rgba(0,17,40,.88);">
+            <div class="rounded-[32px] p-8 max-w-xs w-full shadow-2xl space-y-4" style="background:#001128;border:2px solid rgba(250,75,70,.35);">
                 <div>
-                    <h2 class="text-rose-500 text-[10px] uppercase font-extrabold tracking-widest">¡Fin de la partida!</h2>
+                    <h2 class="text-[10px] uppercase font-extrabold tracking-widest" style="color:#FA4B46;">¡Fin de la partida!</h2>
                     <h3 class="text-3xl font-black text-white mt-1">¡SE CAYÓ EL BALÓN!</h3>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-500 text-[10px] block uppercase font-bold">Puntos</span>
+                    <div class="p-4 rounded-2xl" style="background:rgba(0,0,0,.5);border:1px solid rgba(250,75,70,.2);">
+                        <span class="text-[10px] block uppercase font-bold" style="color:rgba(255,255,255,.45);">Puntos</span>
                         <span id="final-score" class="text-4xl font-black text-white font-mono">0</span>
                     </div>
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-500 text-[10px] block uppercase font-bold">Récord</span>
-                        <span id="final-high-score" class="text-4xl font-black text-yellow-400 font-mono">0</span>
+                    <div class="p-4 rounded-2xl" style="background:rgba(0,0,0,.5);border:1px solid rgba(250,75,70,.2);">
+                        <span class="text-[10px] block uppercase font-bold" style="color:rgba(255,255,255,.45);">Récord</span>
+                        <span id="final-high-score" class="text-4xl font-black font-mono" style="color:#FFD700;">0</span>
                     </div>
                 </div>
 
-                <div id="new-record-tag" class="hidden bg-yellow-500/10 border border-yellow-500/30 py-2.5 rounded-xl animate-pulse">
-                    <span class="text-yellow-400 text-xs font-black uppercase tracking-widest">👑 ¡NUEVA MARCA HISTÓRICA! 👑</span>
+                <div id="new-record-tag" class="hidden py-2.5 rounded-xl animate-pulse" style="background:rgba(250,75,70,.12);border:1px solid rgba(250,75,70,.35);">
+                    <span class="text-xs font-black uppercase tracking-widest" style="color:#FA4B46;">👑 ¡NUEVA MARCA HISTÓRICA! 👑</span>
+                </div>
+
+                <!-- Leaderboard inside game over -->
+                <div>
+                    <h4 class="text-[10px] font-black uppercase tracking-widest mb-2 text-left" style="color:#FA4B46;">🏆 Top Ranking</h4>
+                    <div id="gameover-leaderboard"></div>
                 </div>
 
                 <div class="space-y-2">
-                    <button id="btn-restart" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black py-4 px-6 rounded-2xl shadow-xl transition-all transform active:scale-95 text-lg uppercase tracking-wider">
-                        🔁 Jugar de Nuevo
-                    </button>
-                    <span class="text-slate-500 text-xs block">O pulsa la tecla Espacio</span>
+                    <button id="btn-restart" class="btn-fox">🔁 Jugar de Nuevo</button>
+                    <span class="text-xs block font-medium" style="color:rgba(255,255,255,.3);">O pulsa la tecla Espacio</span>
                 </div>
             </div>
         </div>
 
         <!-- MODAL DE INSTRUCCIONES -->
-        <div id="modal-instructions" class="hidden absolute inset-0 bg-black/95 flex items-center justify-center p-6 z-50 animate-fade-in">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-xs text-left space-y-4">
-                <h3 class="text-xl font-black text-orange-400 text-center uppercase">¿Cómo Jugar?</h3>
-                
-                <ul class="space-y-3 text-slate-300 text-sm">
+        <div id="modal-instructions" class="hidden absolute inset-0 flex items-center justify-center p-6 z-50 animate-fade-in" style="background:rgba(0,17,40,.95);">
+            <div class="rounded-3xl p-6 w-full max-w-xs text-left space-y-4" style="background:#001128;border:1px solid rgba(250,75,70,.3);">
+                <h3 class="text-xl font-black text-center uppercase" style="color:#FA4B46;">¿Cómo Jugar?</h3>
+                <ul class="space-y-3 text-sm" style="color:rgba(239,239,239,.8);">
                     <li class="flex items-start">
-                        <span class="bg-orange-500/20 text-orange-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0">1</span>
+                        <span class="rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0" style="background:rgba(250,75,70,.2);color:#FA4B46;">1</span>
                         El balón caerá libremente desde la parte superior.
                     </li>
                     <li class="flex items-start">
-                        <span class="bg-orange-500/20 text-orange-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0">2</span>
-                        Haz clic en pantalla (o pulsa la tecla <span class="font-mono text-white bg-slate-800 px-1.5 py-0.2 rounded text-xs">Espacio</span>) cuando esté en la línea o cerca de los pies de Foxito.
+                        <span class="rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0" style="background:rgba(250,75,70,.2);color:#FA4B46;">2</span>
+                        Haz clic en pantalla (o pulsa <span class="font-mono px-1.5 rounded text-xs" style="background:rgba(255,255,255,.1);color:#fff;">Espacio</span>) cuando el balón esté cerca de los pies de Foxito.
                     </li>
                     <li class="flex items-start">
-                        <span class="bg-orange-500/20 text-orange-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0">3</span>
-                        La precisión importa. No presiones la pantalla sin parar, calcula tus jugadas y busca el toque perfecto.
+                        <span class="rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0" style="background:rgba(250,75,70,.2);color:#FA4B46;">3</span>
+                        La precisión importa. Calcula tus jugadas y busca el toque perfecto.
                     </li>
                     <li class="flex items-start">
-                        <span class="bg-orange-500/20 text-orange-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0">4</span>
-                        A mayor puntuación, aumenta la velocidad de caída. No presiones la pantalla sin parar, calcula tus jugadas.
+                        <span class="rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0" style="background:rgba(250,75,70,.2);color:#FA4B46;">4</span>
+                        A mayor puntuación, aumenta la velocidad. ¡Sé el campeón del ranking!
                     </li>
                 </ul>
-
-                <button id="btn-close-instructions" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-xl transition-all text-sm uppercase">
+                <button id="btn-close-instructions" class="w-full font-bold py-3 px-6 rounded-xl transition-all text-sm uppercase" style="background:rgba(250,75,70,.15);color:#FA4B46;border:1px solid rgba(250,75,70,.3);">
                     Entendido
                 </button>
             </div>
@@ -296,6 +377,507 @@
     </div>
 
     </main>
+
+    <!-- ══════════════════════════════════════════════
+         MODAL: SELECCIÓN DE JUGADOR (primera vez)
+    ══════════════════════════════════════════════ -->
+    <div id="modal-player-select" class="modal-overlay">
+        <div class="modal-box animate-slide-up">
+            <div class="text-center mb-6">
+                <div class="text-4xl mb-2">🦊</div>
+                <h2 class="text-2xl font-black uppercase" style="color:#EFEFEF;">¡Bienvenido!</h2>
+                <p class="text-sm font-semibold mt-1" style="color:rgba(239,239,239,.5);">Selecciona tu nombre para guardar tu puntaje en el ranking.</p>
+            </div>
+            <input type="text" id="player-search-input" class="player-search" placeholder="🔍 Buscar tu nombre..." oninput="filterPlayers(this.value)">
+            <div id="player-list" class="player-list"></div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         MODAL: RANKING COMPLETO
+    ══════════════════════════════════════════════ -->
+    <div id="modal-ranking" class="modal-overlay hidden">
+        <div class="modal-box animate-slide-up" style="max-width:500px;">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h2 class="text-xl font-black uppercase" style="color:#EFEFEF;">🏆 Ranking General</h2>
+                    <p class="text-xs font-semibold mt-0.5" style="color:rgba(239,239,239,.4);">Mejor puntaje por jugador</p>
+                </div>
+                <button onclick="closeRanking()" class="w-9 h-9 rounded-full flex items-center justify-center font-black text-lg" style="background:rgba(250,75,70,.15);color:#FA4B46;border:1px solid rgba(250,75,70,.3);">✕</button>
+            </div>
+            <div id="full-leaderboard" class="space-y-0"></div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SISTEMA DE JUGADORES Y LEADERBOARD
+    ══════════════════════════════════════════════ -->
+    <script>
+    // ── DATOS DE EMPLEADOS ──
+    const EMPLOYEES = [
+      {name:"Jairo Enrique Pico Morales",photo:"https://ca.slack-edge.com/TK3E9TUMC-U013TAB02K1-9620f6100630-512"},
+      {name:"Juan Sebastian Pico",photo:"https://ca.slack-edge.com/TK3E9TUMC-U01K67XHVU0-50bbbc006873-512"},
+      {name:"Jackeline Carolina Gracey Sanmiguel",photo:"https://ca.slack-edge.com/TK3E9TUMC-U028YN2DN3E-0e548fe7e35b-512"},
+      {name:"Jesus Alberto Ramirez Ramirez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U02S1FMNR8T-37b72a96db92-512"},
+      {name:"Ximena Adriana Moncaleano Montes",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03DAQP8KT9-067adbcfa820-512"},
+      {name:"Valentina Quijano Carrillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03FPHKN1KN-b7221870edf7-512"},
+      {name:"Juan Pablo Beltran Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03HLBEM8A0-9321ba98a9d8-512"},
+      {name:"Juan Manuel Romero Grisales",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03KE7BD798-e4b655d1a23f-512"},
+      {name:"Jorge Eduardo Jimeno Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03KGK0HZ2Q-521f51fdee60-512"},
+      {name:"Carolina Pears Posada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03L4052ETS-348c92e3f41c-512"},
+      {name:"Maria Paula Navarro Ojeda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03QASBGQHX-b1fb5a8de9c0-512"},
+      {name:"Jesus Alberto Garcia Zurita",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03TMHR0WF7-14b8f68881d4-512"},
+      {name:"Laura Ximena Correa Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03UL28HHBR-d262882d7de4-512"},
+      {name:"Santiago Correa Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U040NJ96VQX-437044c0e60c-512"},
+      {name:"Juan Jose Correa Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U046GNYLVGX-6a21d7a3c370-512"},
+      {name:"Cristhian Fernando Villada Quintero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U049RQZUREH-c500753c0e49-512"},
+      {name:"Daniela Franco Herrera",photo:"https://ca.slack-edge.com/TK3E9TUMC-U049UKR93FV-b0a2e448e386-512"},
+      {name:"Juan Diego Quintero Perez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U049X7KEHQU-42840cc05ebb-512"},
+      {name:"Natalia Cardona Lenis",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04DB7K9AAF-20d80444405b-512"},
+      {name:"David Ricardo Sanchez Franco",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04DB7KC8BV-5d9b78597fe6-512"},
+      {name:"Juan Pablo Tabares Velasquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04EMJ7S52S-58f1ee337e7d-512"},
+      {name:"Juan Diego Arevalo Vergara",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04FHT2M2HE-07ea4f5a27ea-512"},
+      {name:"Nicolas Villalba Saray",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04FQ2J6SSE-c93ea88c1784-512"},
+      {name:"Nelsy Patricia Gamez Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04HHUPCT9D-32f9428c23ce-512"},
+      {name:"Douglas Jose Franco Villarroel",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04J0UUP5HS-d2f10d56c7e5-512"},
+      {name:"Andrea Giraldo Chavez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04KP92JZ0X-08225c41906f-512"},
+      {name:"Laura Patiño Franco",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04LQ910NQ7-0aa600aee30d-512"},
+      {name:"Julio Mario Agudelo Farfan",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04M4QUA29Y-8b4ec49a3bc6-512"},
+      {name:"Lycet Mayarit Sanchez Wilches",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04M796KEEQ-240e83d59768-512"},
+      {name:"Natalia Pico Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04QYMGDTNZ-a5e4f86646ed-512"},
+      {name:"Marcela Maria Murcia Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04RFCJCRGA-3d5076cdfe67-512"},
+      {name:"Lineth Luna Herrera",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04RHS9BHJ8-86dc841c64af-512"},
+      {name:"Gabriel Andres Mercado Salas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04UTGVPJR1-37967eed3141-512"},
+      {name:"Juliana Teresa Robayo Ardila",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0514H97VPZ-6bb1413dc104-512"},
+      {name:"Cindy Yurany Gallego",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0528PTBG7J-8ef7b44cffbc-512"},
+      {name:"Diana Calderon Sepulveda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U054DMKGP61-615fc46e14ad-512"},
+      {name:"Andrea Carolina Barrios Carbo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U056A999E3H-20f4c9538808-512"},
+      {name:"Diego Alejandro Ramirez Leal",photo:"https://ca.slack-edge.com/TK3E9TUMC-U058ZP3FJPN-ba29b9e55332-512"},
+      {name:"Daniela Alexandra Garrido Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05EWL23VMM-efd2357243a7-512"},
+      {name:"Ana Maria Cuadros Arias",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05FB2WRVL3-6bdebeb219ea-512"},
+      {name:"Stephany Hernandez Fuenmayor",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05G2PDN23F-81288e08d5da-512"},
+      {name:"Antonio Esteban Escobar",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05G84YUENQ-26d85e21be67-512"},
+      {name:"Junior Enrique Ahumedo De Avila",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05G86RH0HK-e229675d5380-512"},
+      {name:"Carolina Garcia Morales",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05H0HFJ3NU-2e249f68f311-512"},
+      {name:"Maria Alejandra Rojas Benavides",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05HBS5HUH1-8dd660310b7b-512"},
+      {name:"Marcos Eduardo Quintero Bohorquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05JHDUDQSG-3dda7a36c172-512"},
+      {name:"Paula Andrea Maturana Castro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05KB6KVA94-4519e622706b-512"},
+      {name:"Juan Camilo Galera Ruiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05KHRX6YKC-be2556ece33c-512"},
+      {name:"Alejandro Navia Ortiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05M6KR84FR-365b9c805476-512"},
+      {name:"Gustavo Grande Mariscal",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05MJ8K6UHK-a5ff71404b7a-512"},
+      {name:"Jennifer Paola Burkhardt Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05PNQZAJBX-a6a835b643d4-512"},
+      {name:"Gloria Ines Marca Ortiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05PRNDSG10-fb8efdea38ea-512"},
+      {name:"Pablo Emmanuel Condori",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05PRNE84N6-354b63c484e7-512"},
+      {name:"Claudia Viviana Agudelo Marulanda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05PU65CQA0-cb73b805e95c-512"},
+      {name:"Daniela Gutierrez Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05R2NQ7803-f167cd0e3491-512"},
+      {name:"Laura Manuela Piragauta Fernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05RSGUMUNL-0d49b088ad78-512"},
+      {name:"Daniel Mateo Sanchez Granada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05SHVB1KP0-5de2a842d9c3-512"},
+      {name:"Daniel Felipe Tellez Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05T3836TR7-d12dfa4c91b0-512"},
+      {name:"Camilo Andres Anillo Yepes",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05TSEFKBB6-3b6ff631377b-512"},
+      {name:"Julian Gonzalez Osorio",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05TSEFLZEG-1fee264570b3-512"},
+      {name:"Laura Isabel Forero Porras",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0607AJH72P-3fd1d4942712-512"},
+      {name:"Lauro Jose Henao Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U060DHZ5UCC-0c094be78c56-512"},
+      {name:"Henry Humberto Caicedo Velasco",photo:"https://ca.slack-edge.com/TK3E9TUMC-U060WF38WJC-f5d581f13201-512"},
+      {name:"Camilo Piedrahita Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0648CWANSH-426cbf0e9e4a-512"},
+      {name:"Leonardo Jose Aguilar Peña",photo:"https://ca.slack-edge.com/TK3E9TUMC-U065RMVJMD1-2d9b5d0e52af-512"},
+      {name:"Maria Paula Castellanos Monroy",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0697E87BEF-84e08f82b87d-512"},
+      {name:"Adriana Santamaria Osorio",photo:"https://ca.slack-edge.com/TK3E9TUMC-U069KFJ9BQB-a02164703f7b-512"},
+      {name:"Jesica Ayelen Glabor",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06B27M1G57-648dad894fe6-512"},
+      {name:"Justin Alejandra Orellano Guauque",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06DQTC3GE7-1706ef0218f2-512"},
+      {name:"Virginia Jose Alvarez Blanchard",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06FVRA5M5H-c887fa7d94c7-512"},
+      {name:"Jessica Paola Carvajal Tovar",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06G8HVT37B-8bea9dcc3221-512"},
+      {name:"Evanyelis Beatriz Payares Ospino",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06J34PKN4D-7593bb5e2688-512"},
+      {name:"Veronica Trillos Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06J62CLLN6-5f11fddae3d1-512"},
+      {name:"Kevin Stuart Spadaffora Barreto",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06MKS4L5QT-e79eabb6539b-512"},
+      {name:"Jaime Andres Valencia Gaviria",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06MKVB1C74-df9ce869d7a7-512"},
+      {name:"Ailyn Alicia Afanador Linero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06QN4PFGBH-45f76d13dce5-512"},
+      {name:"Gelary Gabriela Manosalva Quiñones",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06QW2HU36J-1b35d7d8ab7e-512"},
+      {name:"Carlos Fernando Colorado Rivera",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06R2HZRJE7-a9e86b8f7259-512"},
+      {name:"Annie Marcela Osorio Marquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06R55F4N76-ea87f7f9f04f-512"},
+      {name:"Marco Steven Rincon Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06SYGHHBFY-87831cd00f67-512"},
+      {name:"Valeria Remedios Vasquez Cuesta",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06THR5L7L1-766fcce9d5f9-512"},
+      {name:"Ingrid Daniela Prieto Prada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07001T5P6Y-0bee48f13b9d-512"},
+      {name:"Laura Camila Vega Fierro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U071NA11HT9-128f1be2f6d6-512"},
+      {name:"Ricardo Aicardo Paz Lasso",photo:"https://ca.slack-edge.com/TK3E9TUMC-U072FGMEDC1-451a2466c140-512"},
+      {name:"Heidy Paola Pulido Castañeda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U075NCPRKEK-85b525717e3c-512"},
+      {name:"Jose Nicolas Forero Urrego",photo:"https://ca.slack-edge.com/TK3E9TUMC-U075WAJ2NJ2-4f30f465104e-512"},
+      {name:"Geraldine Mazo Restrepo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0762V3TS90-1422fcb83b94-512"},
+      {name:"Kevin Daniel Lotero Marin",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0787JRA3GV-89d7e534668c-512"},
+      {name:"Juan Pablo Tellez Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U078D0EMKT6-278f702a7484-512"},
+      {name:"Edwin Steven Burkhardt Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U078Z9Q207J-6cc331b70f88-512"},
+      {name:"Tatiana Orozco Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U079EQCAL7P-b19d936b309b-512"},
+      {name:"Maria Fernanda Mendez Peña",photo:"https://ca.slack-edge.com/TK3E9TUMC-U079HM89XR8-7220a381996e-512"},
+      {name:"Juan Jose Motato Pears",photo:"https://ca.slack-edge.com/TK3E9TUMC-U079Y980Z47-8357d00522a7-512"},
+      {name:"Erika Andrea Chamorro Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07A671QNVC-491bc7f2e2df-512"},
+      {name:"Angela Maria Gonzalez Toscano",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07A671RGT0-6b46ad7c8fd1-512"},
+      {name:"Juan Esteban Aristizabal Lindarte",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07A6EXL43S-0cc806db74af-512"},
+      {name:"Andres Felipe Pedreros",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07A6EZ2JHE-03d48cca650c-512"},
+      {name:"Juan Manuel Cruz Pardo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07ARFUKL9X-2bd6550b23e8-512"},
+      {name:"Jose Alejandro Briceño Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07AVQCGH2Q-3a834c0040e6-512"},
+      {name:"Laura Estefany Zambrano Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07AWTMNF0D-a670e3bc8578-512"},
+      {name:"Juan Camilo Valencia Cespedes",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07BANZRAHF-4362a5ac6806-512"},
+      {name:"Monica Pineda Castaño",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07C14ZSE79-2dd4c0103860-512"},
+      {name:"Jorge Enrique Landazabal Viveros",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07C14ZVA5D-b7496d115c3b-512"},
+      {name:"Brigit Andrea Peña Garavito",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07CFJ3KU8K-125207d65aee-512"},
+      {name:"Alejandro Gomez Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07CUBK3H25-603de31be986-512"},
+      {name:"Daniela Giraldo Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07D4F8UXPS-c2a7e426da16-512"},
+      {name:"William Blas De Leon Garcia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07E3C9A1FG-426a121dec9d-512"},
+      {name:"Fabian Eduardo Rincon Vesga",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07FZRFHTM5-a6d2af6fada2-512"},
+      {name:"Gina Fernanda Gutierrez Arias",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07GE91NRV1-8d64b52bc1a9-512"},
+      {name:"Johann Islen Leon Rojas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07GE91U48K-20adc8374c29-512"},
+      {name:"Charles Giovanni Perez Arguello",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07H3625AUQ-78833bdf7e05-512"},
+      {name:"Carlos Andres Piedrahita Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07HWMAL73R-b76d7057d6f7-512"},
+      {name:"Maria Fernanda Tiria Serrano",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07J8BQFPHB-208bec6fb8bd-512"},
+      {name:"Manolo Chavarria Garay",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07J8BR5ENR-b7fa4ba30608-512"},
+      {name:"Adriana Maria Carrillo Trujillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07JB526QLT-c620afec14ac-512"},
+      {name:"Maira Alejandra Daza Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07JB87F0F4-0443235206f3-512"},
+      {name:"Isley Valentina Sanchez Wilches",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07LBG3BPEE-75e1cdbffc03-512"},
+      {name:"Camila Moreno Higuita",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07MTEXB0A3-47eb1a2b7a36-512"},
+      {name:"Angelica Maria Trillos Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07NA7VTFS4-06c0be30a225-512"},
+      {name:"Daniel De Jesus Munera Henao",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07Q2RZ1LS3-2420ba3036c2-512"},
+      {name:"Katerine Del Carmen Marquez Machado",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07QBS82K2B-fdc711348e14-512"},
+      {name:"Sofia Arboleda Londoño",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07QH9W6XEX-5db19e9e555f-512"},
+      {name:"Dayanna Isabel Diaz Chaves",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07QKTBL0CU-cd701ccefa92-512"},
+      {name:"Jessica Alejandra Gallego Estrada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07R66HB6C8-4571132f8c57-512"},
+      {name:"Jose Luis Varela Sanchez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07SDMZJZT8-6bfabd0ab90e-512"},
+      {name:"Natalia Ramirez Ocampo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07SEJJPX7V-ac72a9360655-512"},
+      {name:"Ana Marcela Sierra Arrieta",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07SLAYQYRG-1981b90de719-512"},
+      {name:"Julian Pico Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U083NRPNV17-80c8e437381b-512"},
+      {name:"Mauricio Caro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0871C122BZ-a8d445391cb6-512"},
+      {name:"Sebastian Varela",photo:"https://ca.slack-edge.com/TK3E9TUMC-U087T09KE1M-0d8a0c880029-512"},
+      {name:"Johanna Jasbleidy Romero Cabezas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0880T65VJS-0f828acb2293-512"},
+      {name:"Andres Felipe Villarreal Rojano",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0880T6EQ4E-389836c5a10a-512"},
+      {name:"Kelly Johanna Mahecha Bejarano",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0884LR9PLM-a9703cb381ef-512"},
+      {name:"Carlos Felipe Pico Bedoya",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0889051XJN-f8c98ed0660e-512"},
+      {name:"Natalia Ramirez Marin",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0889CVAQ8L-3331d567c896-512"},
+      {name:"Danna Catherine Botia Cabezas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088A1RETFW-a1bd46899dff-512"},
+      {name:"Jean Marco Bendezu",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088FLJG170-97843eeb6d05-512"},
+      {name:"Andrea Jimenez Carreño",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088L70F41F-a037049535a9-512"},
+      {name:"John Deiby Motta Murillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088L714HT3-81478fdd585e-512"},
+      {name:"Jacobo Ladino Baena",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088WAJRAGG-0ca803af6c75-512"},
+      {name:"Leidy Paola Osorio Lozada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088WAJSDTJ-40bcbf0a4ded-512"},
+      {name:"Andrea Valentina Perez Banquet",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0894CMG2G5-a1f3a04f92a6-512"},
+      {name:"Kelly Alejandra Correa Molina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0899P2CLP6-fdbd54741b12-512"},
+      {name:"Erika Alejandra Rivera Padua",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0899P39V52-8d98b5c7ee62-512"},
+      {name:"Juan Pablo Guerrero Aguirre",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08AWEXUUGY-ba5136c960e5-512"},
+      {name:"Brian Santiago Arias Barreto",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08B639QNHK-203e8629334d-512"},
+      {name:"Layla Margarita Medina Luna",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08CBPJBJG7-9d9a810dc787-512"},
+      {name:"Andres Felipe Navarro Ojeda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08CL2AKU0J-e90af884a44f-512"},
+      {name:"Maria Paula Dangond Castro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08CP0MCCH2-918f5ee952b5-512"},
+      {name:"Camila Loaiza Orozco",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08ED6NCE01-92ba45f00146-512"},
+      {name:"Angie Vivanco Martinez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08EHMPNLPM-12d3f8165a64-512"},
+      {name:"Julieth Paulina Guzman Mendoza",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08EL9JD8P6-684f43cc4468-512"},
+      {name:"Nataly Dayanna Mendez Astudillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08FKE49G5T-462b8a54ab13-512"},
+      {name:"Alejandra Garcia Giraldo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08FKE5PR7X-90799ae42e54-512"},
+      {name:"Laura Sanchez Roldan",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08G8GDC4SY-a82ae64cad59-512"},
+      {name:"Santiago Tamayo Jaramillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08GSB18GUA-9dd431d11ba1-512"},
+      {name:"Lina Andrea Ovalle Silva",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08JNEWGE6A-f52a60577318-512"},
+      {name:"Maritzabel Carmona Guiral",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08JNEXD538-dc8c967f885f-512"},
+      {name:"Yuri Andrea Marca Ortiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08KAK0CP2S-2b019dd60908-512"},
+      {name:"Luis Alfredo Garcia Bernal",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08L88YH07N-ff9429403a80-512"},
+      {name:"Isabella Villalba Saray",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08N7PCPBB5-406351ec9346-512"},
+      {name:"Ivon Lorena Barrera Contreras",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08NXQTSCGJ-682e571dd24c-512"},
+      {name:"Isabella Cristhina Araque Calderon",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08PW02FL1Z-f79b384a6c28-512"},
+      {name:"Douglis Del Valle Franco Villarroel",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08PW03ME0K-2d378abbe9e9-512"},
+      {name:"Eliana Maria Suarez Baquero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08Q6BYHY03-07d721e9d5ac-512"},
+      {name:"David Mendoza Arevalo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08RBGTQ6DV-5d58981db64c-512"},
+      {name:"Daniela Jimenez Vasquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08RBGUBLEB-d13a89561af5-512"},
+      {name:"Carmen Sofia Mendoza Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08S1F87EEL-af99e0f1463e-512"},
+      {name:"Marisabella Rossi Arrieta Ballestss",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08TR5WB9FX-303d9e161990-512"},
+      {name:"Andry Patricia Hoyos Perez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08V5KGNA3T-4a62adcafc83-512"},
+      {name:"Lauren Natalia Manotas Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U091FR504CS-318ea5ffb764-512"},
+      {name:"Diana Paola Cruz Sosa",photo:"https://ca.slack-edge.com/TK3E9TUMC-U091FRB5MMY-8d720ca63cbb-512"},
+      {name:"Cesar Augusto Castaño Carvajal",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AFR01E-4e90ca4afc00-512"},
+      {name:"Andres Felipe Gonzalez Pastrana",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AHU116-f70472703408-512"},
+      {name:"Angie Milena Moros Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AKLLCQ-55e136f10c79-512"},
+      {name:"Erika Yamile Martinez Rios",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AKQ4RW-5aa9fa24e09a-512"},
+      {name:"Valeria Alvarado Piedrahita",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AKQV6C-1572e19c04ce-512"},
+      {name:"Jesus Daniel Garcia Neira",photo:"https://ca.slack-edge.com/TK3E9TUMC-U094U6D8073-16fa15fe5329-512"},
+      {name:"Juan Luis De La Rosa Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U098MNCFB0C-1f4788ec44ad-512"},
+      {name:"Mateo Duque Cuervo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U098MNDP620-f7b322460a9e-512"},
+      {name:"Rodrigo Andres Herrera Perez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U098MNE5YKE-e4c3a6552f1b-512"},
+      {name:"Yonathan Estiben Arias Jimenez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U098MNF09MJ-552df1d038d7-512"},
+      {name:"Pedro Armando Roman Ceballos",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09AL014BGV-eece69a05636-512"},
+      {name:"Juliana Triviño Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09CVEBL7PW-3340619eb863-512"},
+      {name:"Juan Jose Fajardo Lotero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09ENME7PQE-5132f17ec786-512"},
+      {name:"Michael David Rincon Guerrero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09GA9FM5HQ-be647726e1d6-512"},
+      {name:"Claudia Vanessa Aristizabal Lindarte",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09GA9GA2JE-cd260c8e564f-512"},
+      {name:"Violeta Chamorro Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09GMCVT1FV-4e67d5440055-512"},
+      {name:"Andres Felipe Calderon Ardila",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09HD62J32N-75ac7f40ad36-512"},
+      {name:"Paula Andrea Valentin Acosta",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09HHG6DB8S-c218afadb942-512"},
+      {name:"Mario Fernando Hernandez Vanegas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09HHG6DSPL-ddc401932dfc-512"},
+      {name:"Geraldine Sofia Zambrano Calderon",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09JT1JK4LW-a1bce71f64be-512"},
+      {name:"Derly Ovallos Garcia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09LL965U3D-a75d90b65d0b-512"},
+      {name:"Nicolas Monroy Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09M661F6CE-45b48b53e29a-512"},
+      {name:"Angel Eduardo Hernandez Cubillan",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09NBUXA351-3489fe96281f-512"},
+      {name:"Diego Jesus Medina Ovalles",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09NJ3MF9LJ-aca9a17f32a1-512"},
+      {name:"Esteban Agudelo Ramirez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09NMKKCS20-6fd5bc5f34d1-512"},
+      {name:"Juan David Moya",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A66PRP5RD-8ea3514fb004-512"},
+      {name:"Nicolas Stiven Pulido Morales",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A66PSDDQF-0898efbac2c8-512"},
+      {name:"Cristian Fernando Santacruz Jimenez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A6JQ41Z37-ef3074694f63-512"},
+      {name:"Maria Del Pilar Ibarra Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A6L67LC78-5b7fa1dddf0f-512"},
+      {name:"Karen Arelys Cardenas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A6N77D1GS-f9468fe25595-512"},
+      {name:"Rosiris Marialec Guerrero Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A71561A4R-bb7c77ce6771-512"},
+      {name:"Sara Valentina Ibarra Rojas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AAUSB4H0S-92c223e0688e-512"},
+      {name:"Sara Ruiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ABUN93JAK-e7130c6745c4-512"},
+      {name:"Andres Eduardo Manosalva Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AC6NVPJ6R-391cf065d8af-512"},
+      {name:"Yuliana Daza Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ACP3RDE2V-df18550930a9-512"},
+      {name:"Lilia Esperanza Castillo Garzon",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ACP3SJYL9-57806810231d-512"},
+      {name:"Jenny Del Carmen Cepeda Ebratt",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AFLAPKY4X-1b4a7253f780-512"},
+      {name:"Luz Angela Otalora Chiguasuque",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AFUFC90RG-4c63d0365dc4-512"},
+      {name:"Javier Leal Velasquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AFZ504JKF-0f5b27bae28e-512"},
+      {name:"Eliana Gabriela Gomez Ferro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AGDR14Q67-a4d08dd286e0-512"},
+      {name:"Mateo Delgado Navarro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AGZBJ0RA5-e05a41eaa615-512"},
+      {name:"Maria Nelly Solis Carabali",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHLQZ7T7X-8fe1f9c81a2c-512"},
+      {name:"Santiago Pinzon Suarez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHLR0FG77-aa0567f5bfe1-512"},
+      {name:"Camilo Andres Bajonero Cortes",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHLR16JGM-2b2dad0b0d1b-512"},
+      {name:"Jhojan Stiven Duque Chavarro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHN6523HC-865e783a966c-512"},
+      {name:"Natalia Zapata Noreña",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHQ818B5Y-af475dc9ca43-512"},
+      {name:"Andrei Mauricio Amador Sanchez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AJFFT222X-3bcc582366a1-512"},
+      {name:"Maria Juliana Rivas Arboleda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AK1BCKQ0M-575ddb80605b-512"},
+      {name:"Carlos Leonardo Florez Alvarado",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AKDQLGD50-2ebad04e8a38-512"},
+      {name:"Jhonattan Alexis Melgarejo Ritiva",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AKHMCL69F-660deb9a53c2-512"},
+      {name:"Erika Martinez Martinez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AKZ214G5N-03c4c408f678-512"},
+      {name:"Andres Fabian Moreno Jimenez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ALD9ESH8T-125555d81567-512"},
+      {name:"Paul Andres Ruiz Niño",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AMDUU84UQ-d1b105105798-512"},
+      {name:"William Andres Muñoz Angel",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AN3SYSX8T-d918cb0208d7-512"},
+      {name:"Sara Vanessa Rivero Mazzo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ANA8W3MFC-f3b9dbd60460-512"},
+      {name:"Alejandra Leon Gamez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AQN85PDGB-e5a9f6ad12d2-512"},
+      {name:"Alvaro Jose Campo Vasquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09HHG5DMV0-f4fc8150a3ad-512"},
+      {name:"Angel Silvana Milian Pinto",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088A1RG5V2-45f1a86c91b4-192"},
+      {name:"Angela Yuliana Salamanca Montenegro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AR7GH5M25-fb90398b0de0-512"},
+      {name:"Brayan Alejandro Aldana Bolaños",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AT14AB3B2-768402108c8a-512"},
+      {name:"Cristian Camilo Fajardo Ramirez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AQR7F2JMT-bb12043c37d4-512"},
+      {name:"Diana Katerine Antonio Mongui",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07CUBJMZCZ-22a2955f6395-512"},
+      {name:"Emmanuel Galindo Sanchez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AV0RT2G77-fb5be3aa1242-192"},
+      {name:"Erika Tatiana Rodriguez Ordonez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ATYCGLCCU-5f92f7668075-192"},
+      {name:"Esneider Leonardo Melo Suarez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B0JG9UW8Y-38302ab30179-512"},
+      {name:"Ginna Candelaria Medina Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04L0SJQX1B-877ad42c7efc-512"},
+      {name:"Irianimar Pacheco Sulbaran",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AV26JQT2A-5ba2c96e0d22-512"},
+      {name:"Joshua Felipe Delgado Murcia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AUE12BK6F-93b88fd8da76-512"},
+      {name:"Juan Alejandro Carvajal Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B5Q3212TS-6286777c280c-512"},
+      {name:"Juan Pico",photo:"https://ca.slack-edge.com/TK3E9TUMC-UK328C8UV-b9b8bcf153c7-512"},
+      {name:"Juan Sebastian Sanchez Castellanos",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AQSHMHAR4-717997defc64-512"},
+      {name:"Karen Yulieth Cortes Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B1FF0CBQD-a1c11b8ab3a9-512"},
+      {name:"Luis David Parra Valencia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B0JGDDLG0-85d1cf380329-512"},
+      {name:"Margareth Duran Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B4EAMF1D5-20db1b58ea01-512"},
+      {name:"Pedro Antonio Guerrido Peña",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B1CFQB7DZ-ceb8e52e293d-512"},
+      {name:"Tomas Ricardo Llorente Espitia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ATRCDDUCD-e7c3f7df812f-512"},
+      {name:"Viviana Millan Constain",photo:"https://ca.slack-edge.com/TK3E9TUMC-U042EQ8984S-3583680abf8a-512"}
+    ];
+
+    // ── ESTADO DEL JUGADOR ACTUAL ──
+    let currentPlayer = null;  // { name, photo }
+
+    // ════════════════════════════════════════════════════════
+    //  CONFIGURACIÓN GOOGLE SHEETS
+    //  👉 Pega aquí la URL de tu Apps Script después de publicarlo
+    // ════════════════════════════════════════════════════════
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyGjkhvA75dicV3hfUKyNhLYNDztXJpvALB3RWxHq0nia4_8GrnEHV4qdrmw-m7ReB5pw/exec';
+
+    const PLAYER_KEY = 'foxito_current_player';
+
+    // Cache local del leaderboard para no pedir a Sheets en cada render
+    let _leaderboardCache = [];
+    let _lastFetch = 0;
+    const FETCH_INTERVAL = 30000; // refrescar cada 30s
+
+    // ── OBTENER LEADERBOARD DESDE GOOGLE SHEETS ──
+    async function fetchLeaderboard(force = false) {
+        const now = Date.now();
+        if (!force && now - _lastFetch < FETCH_INTERVAL && _leaderboardCache.length > 0) {
+            return _leaderboardCache; // usar cache
+        }
+        if (SHEET_URL === 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT') {
+            return _leaderboardCache; // URL no configurada aún
+        }
+        try {
+            const res = await fetch(`${SHEET_URL}?action=get`);
+            const json = await res.json();
+            if (json.ok && Array.isArray(json.data)) {
+                _leaderboardCache = json.data;
+                _lastFetch = now;
+            }
+        } catch(e) {
+            console.warn('No se pudo cargar el leaderboard:', e);
+        }
+        return _leaderboardCache;
+    }
+
+    // ── ENVIAR PUNTAJE A GOOGLE SHEETS ──
+    async function updatePlayerScore(score) {
+        if (!currentPlayer) return;
+
+        // Verificar si es mejor que el cache local primero
+        const existing = _leaderboardCache.find(e => e.name === currentPlayer.name);
+        if (existing && score <= existing.score) return; // no superó récord
+
+        if (SHEET_URL === 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT') {
+            console.warn('Configura SHEET_URL para guardar puntajes en la nube.');
+            return;
+        }
+        try {
+            const params = new URLSearchParams({
+                action: 'save',
+                name:   currentPlayer.name,
+                photo:  currentPlayer.photo,
+                score:  score
+            });
+            await fetch(`${SHEET_URL}?${params}`);
+            // Refrescar leaderboard después de guardar
+            await fetchLeaderboard(true);
+            renderAllLeaderboards();
+        } catch(e) {
+            console.warn('Error guardando puntaje:', e);
+        }
+    }
+
+    // ── CONSTRUIR HTML DE FILAS DEL LEADERBOARD ──
+    function buildLeaderboardRows(data, limit) {
+        if (!data || data.length === 0) {
+            return '<p style="font-size:12px;color:rgba(255,255,255,.3);font-weight:600;text-align:center;padding:8px;">Aún no hay puntajes. ¡Sé el primero!</p>';
+        }
+        const top = limit ? data.slice(0, limit) : data;
+        const maxScore = top[0].score || 1;
+        const rankMedals = ['gold', 'silver', 'bronze'];
+
+        return top.map((entry, i) => {
+            const pct = Math.max(18, Math.round((entry.score / maxScore) * 100));
+            const medal = rankMedals[i] || '';
+            const rankLabel = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`;
+            const isMe = currentPlayer && entry.name === currentPlayer.name;
+            return `
+            <div class="lb-bar-wrap">
+                <span class="lb-rank ${medal}">${rankLabel}</span>
+                <div class="lb-bar" ${isMe ? 'style="border-color:rgba(250,75,70,.7);box-shadow:0 0 8px rgba(250,75,70,.3);"' : ''}>
+                    <div class="lb-bar-fill ${medal}" style="--bar-w:${pct}%;"></div>
+                    <img class="lb-avatar" src="${entry.photo}" alt="" onerror="this.style.background='#FA4B46';this.src='';">
+                    <span class="lb-name">${isMe ? '⭐ ' : ''}${entry.name.split(' ').slice(0,2).join(' ')}</span>
+                    <span class="lb-score">${entry.score}</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    async function renderAllLeaderboards() {
+        const data = await fetchLeaderboard();
+        const asideLb   = document.getElementById('aside-leaderboard');
+        const gameoverLb = document.getElementById('gameover-leaderboard');
+        const fullLb    = document.getElementById('full-leaderboard');
+        if (asideLb)    asideLb.innerHTML    = buildLeaderboardRows(data, 5);
+        if (gameoverLb) gameoverLb.innerHTML  = buildLeaderboardRows(data, 5);
+        if (fullLb)     fullLb.innerHTML      = buildLeaderboardRows(data, null);
+    }
+
+    // ── MODAL RANKING ──
+    function openRanking() {
+        document.getElementById('modal-ranking').classList.remove('hidden');
+        // Mostrar spinner mientras carga
+        const fullLb = document.getElementById('full-leaderboard');
+        if (fullLb) fullLb.innerHTML = '<p style="font-size:12px;color:rgba(255,255,255,.35);text-align:center;padding:16px;">⏳ Cargando ranking...</p>';
+        fetchLeaderboard(true).then(data => {
+            if (fullLb) fullLb.innerHTML = buildLeaderboardRows(data, null);
+        });
+    }
+    function closeRanking() {
+        document.getElementById('modal-ranking').classList.add('hidden');
+    }
+
+    // ── FILTRO DE BÚSQUEDA ──
+    function filterPlayers(query) {
+        const q = query.trim().toLowerCase();
+        const filtered = q ? EMPLOYEES.filter(e => e.name.toLowerCase().includes(q)) : EMPLOYEES;
+        renderPlayerList(filtered);
+    }
+
+    function renderPlayerList(list) {
+        const container = document.getElementById('player-list');
+        if (!list.length) {
+            container.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,.35);padding:12px;text-align:center;">No se encontró ese nombre.</p>';
+            return;
+        }
+        container.innerHTML = list.map((emp, i) => `
+            <div class="player-item" data-name="${emp.name.replace(/"/g,'&quot;')}" data-photo="${emp.photo}">
+                <img src="${emp.photo}" alt="" onerror="this.style.background='#FA4B46';">
+                <span>${emp.name}</span>
+            </div>
+        `).join('');
+
+        // Attach click handlers directly (avoids inline onclick encoding issues)
+        container.querySelectorAll('.player-item').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectPlayer(this.dataset.name, this.dataset.photo);
+            });
+            el.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                selectPlayer(this.dataset.name, this.dataset.photo);
+            });
+        });
+    }
+
+    function selectPlayer(name, photo) {
+        currentPlayer = { name, photo };
+        try { localStorage.setItem(PLAYER_KEY, JSON.stringify(currentPlayer)); } catch(e) {}
+
+        // Update aside display
+        const asideInfo   = document.getElementById('aside-player-info');
+        const asideName   = document.getElementById('aside-player-name');
+        const asideAvatar = document.getElementById('aside-player-avatar');
+        if (asideInfo) {
+            asideInfo.classList.remove('hidden');
+            asideName.textContent = name.split(' ').slice(0,2).join(' ');
+            asideAvatar.src = photo;
+        }
+
+        // Sync highscore from cloud cache for this player
+        const myRecord = (_leaderboardCache.find(e => e.name === name) || {}).score || 0;
+        try { localStorage.setItem('foxito_high_score', myRecord.toString()); } catch(e) {}
+
+        // Hide modal and render leaderboard
+        document.getElementById('modal-player-select').classList.add('hidden');
+        renderAllLeaderboards();
+    }
+
+    // ── BOTÓN CAMBIAR JUGADOR ──
+    document.addEventListener('DOMContentLoaded', function() {
+        const changeBtn = document.getElementById('aside-change-player');
+        if (changeBtn) {
+            changeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.getElementById('player-search-input').value = '';
+                renderPlayerList(EMPLOYEES);
+                document.getElementById('modal-player-select').classList.remove('hidden');
+            });
+        }
+    });
+
+    // ── INIT: cargar leaderboard y verificar jugador guardado ──
+    (async function initPlayer() {
+        // Cargar leaderboard desde Sheets en segundo plano
+        fetchLeaderboard(true).then(() => renderAllLeaderboards());
+
+        try {
+            const saved = JSON.parse(localStorage.getItem(PLAYER_KEY) || 'null');
+            if (saved && saved.name && saved.photo) {
+                const found = EMPLOYEES.find(e => e.name === saved.name);
+                if (found) {
+                    selectPlayer(found.name, found.photo);
+                    return;
+                }
+            }
+        } catch(e) {}
+        // Mostrar modal de selección
+        renderPlayerList(EMPLOYEES);
+    })();
+
+    // Refrescar leaderboard automáticamente cada 30s mientras la página está abierta
+    setInterval(() => {
+        fetchLeaderboard(true).then(() => renderAllLeaderboards());
+    }, 30000);
+
+    </script>
 
     <!-- CÓDIGO DEL JUEGO (VANILLA JAVASCRIPT EXTREMADAMENTE COMPATIBLE) -->
     <script>
@@ -334,7 +916,6 @@
         let score = 0;
         let highScore = 0;
         let soundEnabled = true;
-        let currentPlayer = null;
 
         // Intentar recuperar el récord del localStorage de forma segura
         try {
@@ -1398,7 +1979,7 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                ctx.font = "900 44px 'Arial Black', Impact, sans-serif";
+                ctx.font = "900 44px 'Montserrat', 'Arial Black', Impact, sans-serif";
                 ctx.lineWidth = 9;
                 ctx.strokeStyle = 'rgba(15, 23, 42, 0.92)';
                 ctx.fillStyle = '#facc15';
@@ -1407,7 +1988,7 @@
                 ctx.strokeText('Happy 12th', 0, 0);
                 ctx.fillText('Happy 12th', 0, 0);
 
-                ctx.font = "900 42px 'Arial Black', Impact, sans-serif";
+                ctx.font = "900 42px 'Montserrat', 'Arial Black', Impact, sans-serif";
                 ctx.strokeText('Birthday Fox', 0, 48);
                 ctx.fillText('Birthday Fox', 0, 48);
 
@@ -1705,7 +2286,7 @@
                 ctx.save();
                 ctx.globalAlpha = t.alpha;
                 ctx.fillStyle = t.color;
-                ctx.font = `bold ${t.size}px 'Arial Black', sans-serif`;
+                ctx.font = `bold ${t.size}px 'Montserrat', 'Arial Black', sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.shadowColor = 'rgba(0,0,0,0.6)';
                 ctx.shadowBlur = 5;
@@ -1719,7 +2300,7 @@
             if (gameState === 'playing') {
                 ctx.save();
                 ctx.fillStyle = '#ffffff';
-                ctx.font = "bold 96px 'Impact', sans-serif";
+                ctx.font = "bold 96px 'Montserrat', 'Impact', sans-serif";
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
                 ctx.strokeStyle = '#1e3a8a';
@@ -1881,18 +2462,12 @@
                 } catch(e) {}
                 setTimeout(() => playSound('record'), 400);
             }
-try {
-    if (window.db) {
-        addDoc(collection(db, "scores"), {
-            player: "Camilo Piedrahita Lopez",
-            photo: "https://ca.slack-edge.com/TK3E9TUMC-U0648CWANSH-426cbf0e9e4a-512",
-            score: score,
-            timestamp: Date.now()
-        });
-    }
-} catch (e) {
-    console.error("Firebase error:", e);
-}
+
+            // Guardar mejor puntaje del jugador en el leaderboard global
+            if (typeof updatePlayerScore === 'function') {
+                updatePlayerScore(score);
+            }
+
             updateScreenUI();
         }
 
@@ -1946,6 +2521,11 @@ try {
                     newRecordTag.classList.remove('hidden');
                 } else {
                     newRecordTag.classList.add('hidden');
+                }
+
+                // Refresh leaderboard on gameover screen
+                if (typeof renderAllLeaderboards === 'function') {
+                    renderAllLeaderboards();
                 }
             }
         }
@@ -2047,29 +2627,5 @@ try {
     
         })();
     </script>
-    <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyD8Mmvjm8OBc-ZoDcZ7jGvuTez9lc0ChuA",
-  authDomain: "fox-birthday-game.firebaseapp.com",
-  projectId: "fox-birthday-game",
-  storageBucket: "fox-birthday-game.firebasestorage.app",
-  messagingSenderId: "440806518997",
-  appId: "1:440806518997:web:588318536e475a9aabf25c"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.db = db;
-window.addDoc = addDoc;
-window.collection = collection;
-</script>
 </body>
 </html>
