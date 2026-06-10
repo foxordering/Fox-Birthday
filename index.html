@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦊</text></svg>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foxito Birthday Rush</title>
+    <title>FOX Birthday Rush</title>
     <!-- Google Fonts: Montserrat -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Tailwind CSS para el diseño premium de la interfaz -->
@@ -109,7 +110,7 @@
         .lb-bar-fill.silver { background:linear-gradient(90deg,#708090,#C0C0C0); }
         .lb-bar-fill.bronze { background:linear-gradient(90deg,#8B4513,#CD7F32); }
         .lb-avatar { position:relative;z-index:2;width:30px;height:30px;border-radius:6px;margin-left:5px;border:2px solid rgba(255,255,255,.35);object-fit:cover;flex-shrink:0;background:#001128; }
-        .lb-name { position:relative;z-index:2;font-size:11px;font-weight:700;color:#fff;margin-left:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px; }
+        .lb-name { position:relative;z-index:2;font-size:11px;font-weight:700;color:#fff;margin-left:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px; }
         .lb-score { position:relative;z-index:2;margin-left:auto;margin-right:8px;font-size:13px;font-weight:900;color:#fff;flex-shrink:0; }
 
         /* Modals */
@@ -200,8 +201,8 @@
                 <span class="inline-flex items-center gap-2 text-white text-[11px] font-black tracking-widest px-4 py-1.5 rounded-full uppercase shadow" style="background:linear-gradient(135deg,#FA4B46,#ff7055);">
                     🦊 Fox 12th Birthday
                 </span>
-                <h1 class="text-4xl md:text-5xl font-black tracking-tighter leading-none uppercase" style="color:#EFEFEF;">
-                    Foxito Birthday Rush
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter leading-none uppercase" style="color:#EFEFEF;">
+                    FOX Birthday Rush
                 </h1>
                 <p class="text-sm md:text-base font-semibold leading-relaxed mb-2" style="color:#FA4B46;">
                     ¿Tienes lo necesario para llegar al primer lugar?
@@ -251,7 +252,7 @@
                 <div class="w-20 h-20 rounded-full animate-spin" style="border:4px solid #FA4B46;border-top-color:transparent;"></div>
                 <div class="absolute inset-0 flex items-center justify-center text-xl font-bold">🦊</div>
             </div>
-            <h2 class="text-xl font-black tracking-wider" style="color:#FA4B46;">FOXITO BIRTHDAY RUSH</h2>
+            <h2 class="text-xl font-extrabold tracking-wider" style="color:#FA4B46;">FOX BIRTHDAY RUSH</h2>
             <p class="text-sm mt-2" style="color:rgba(239,239,239,.5);">Construyendo el estadio y preparando animaciones...</p>
         </div>
 
@@ -272,11 +273,11 @@
         <!-- PANTALLA DE INICIO (TOUCH TO KICK) -->
         <div id="screen-start" class="hidden absolute inset-0 flex flex-col items-center justify-between py-16 px-6 z-20 cursor-pointer animate-fade-in text-center" style="background:rgba(0,17,40,.65);">
             <div class="space-y-2 mt-4">
-                <h1 class="text-5xl font-black tracking-tighter text-white drop-shadow-lg uppercase mt-2">
-                    FOXITO BIRTHDAY RUSH
+                <h1 class="text-5xl font-extrabold tracking-tighter text-white drop-shadow-lg uppercase mt-2">
+                    FOX BIRTHDAY RUSH
                 </h1>
                 <p class="text-sm max-w-xs mx-auto mt-2 font-semibold" style="color:rgba(239,239,239,.8);">
-                    Mantén el balón en el aire y celebra los 12 años de Fox. Haz clic o pulsa la pantalla cuando el balón baje a la altura de los botines de Foxito.
+                    Mantén el balón en el aire y celebra los 12 años de FOX. Haz clic o pulsa la pantalla cuando el balón baje a la altura de los botines de FOX.
                 </p>
             </div>
 
@@ -292,7 +293,7 @@
             <div class="space-y-3 w-full max-w-[280px]">
                 <div class="px-6 py-3 rounded-2xl flex justify-between items-center" style="background:rgba(0,0,0,.6);border:1px solid rgba(250,75,70,.2);">
                     <span class="text-xs uppercase tracking-wider font-bold" style="color:rgba(255,255,255,.5);">Mejor Récord</span>
-                    <span id="start-high-score" class="text-2xl font-black font-mono" style="color:#FFD700;">0 Toques</span>
+                    <span id="start-high-score" class="text-2xl font-extrabold font-mono" style="color:#FFD700;">0 Toques</span>
                 </div>
             </div>
         </div>
@@ -302,17 +303,17 @@
             <div class="rounded-[32px] p-8 max-w-xs w-full shadow-2xl space-y-4" style="background:#001128;border:2px solid rgba(250,75,70,.35);">
                 <div>
                     <h2 class="text-[10px] uppercase font-extrabold tracking-widest" style="color:#FA4B46;">¡Fin de la partida!</h2>
-                    <h3 class="text-3xl font-black text-white mt-1">¡SE CAYÓ EL BALÓN!</h3>
+                    <h3 class="text-3xl font-extrabold text-white mt-1">¡SE CAYÓ EL BALÓN!</h3>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="p-4 rounded-2xl" style="background:rgba(0,0,0,.5);border:1px solid rgba(250,75,70,.2);">
                         <span class="text-[10px] block uppercase font-bold" style="color:rgba(255,255,255,.45);">Puntos</span>
-                        <span id="final-score" class="text-4xl font-black text-white font-mono">0</span>
+                        <span id="final-score" class="text-4xl font-extrabold text-white font-mono">0</span>
                     </div>
                     <div class="p-4 rounded-2xl" style="background:rgba(0,0,0,.5);border:1px solid rgba(250,75,70,.2);">
                         <span class="text-[10px] block uppercase font-bold" style="color:rgba(255,255,255,.45);">Récord</span>
-                        <span id="final-high-score" class="text-4xl font-black font-mono" style="color:#FFD700;">0</span>
+                        <span id="final-high-score" class="text-4xl font-extrabold font-mono" style="color:#FFD700;">0</span>
                     </div>
                 </div>
 
@@ -336,7 +337,7 @@
         <!-- MODAL DE INSTRUCCIONES -->
         <div id="modal-instructions" class="hidden absolute inset-0 flex items-center justify-center p-6 z-50 animate-fade-in" style="background:rgba(0,17,40,.95);">
             <div class="rounded-3xl p-6 w-full max-w-xs text-left space-y-4" style="background:#001128;border:1px solid rgba(250,75,70,.3);">
-                <h3 class="text-xl font-black text-center uppercase" style="color:#FA4B46;">¿Cómo Jugar?</h3>
+                <h3 class="text-xl font-extrabold text-center uppercase" style="color:#FA4B46;">¿Cómo Jugar?</h3>
                 <ul class="space-y-3 text-sm" style="color:rgba(239,239,239,.8);">
                     <li class="flex items-start">
                         <span class="rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0" style="background:rgba(250,75,70,.2);color:#FA4B46;">1</span>
@@ -344,7 +345,7 @@
                     </li>
                     <li class="flex items-start">
                         <span class="rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0" style="background:rgba(250,75,70,.2);color:#FA4B46;">2</span>
-                        Haz clic en pantalla (o pulsa <span class="font-mono px-1.5 rounded text-xs" style="background:rgba(255,255,255,.1);color:#fff;">Espacio</span>) cuando el balón esté cerca de los pies de Foxito.
+                        Haz clic en pantalla (o pulsa <span class="font-mono px-1.5 rounded text-xs" style="background:rgba(255,255,255,.1);color:#fff;">Espacio</span>) cuando el balón esté cerca de los pies de FOX.
                     </li>
                     <li class="flex items-start">
                         <span class="rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 shrink-0" style="background:rgba(250,75,70,.2);color:#FA4B46;">3</span>
@@ -385,11 +386,31 @@
         <div class="modal-box animate-slide-up">
             <div class="text-center mb-6">
                 <div class="text-4xl mb-2">🦊</div>
-                <h2 class="text-2xl font-black uppercase" style="color:#EFEFEF;">¡Bienvenido!</h2>
+                <h2 class="text-2xl font-extrabold uppercase" style="color:#EFEFEF;">¡Bienvenido!</h2>
                 <p class="text-sm font-semibold mt-1" style="color:rgba(239,239,239,.5);">Selecciona tu nombre para guardar tu puntaje en el ranking.</p>
             </div>
             <input type="text" id="player-search-input" class="player-search" placeholder="🔍 Buscar tu nombre..." oninput="filterPlayers(this.value)">
             <div id="player-list" class="player-list"></div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         MODAL: CONFIRMACIÓN DE JUGADOR
+    ══════════════════════════════════════════════ -->
+    <div id="modal-confirm-player" class="modal-overlay hidden">
+        <div class="modal-box animate-slide-up" style="max-width:360px;">
+            <div class="text-center mb-5">
+                <img id="confirm-avatar" src="" alt="" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-4" style="border:3px solid #FA4B46;">
+                <p class="text-sm font-semibold mb-1" style="color:rgba(239,239,239,.55);">¿Confirmas que eres...?</p>
+                <h2 id="confirm-name" class="text-xl font-extrabold" style="color:#EFEFEF;"></h2>
+                <p class="text-xs font-semibold mt-3 px-2 leading-relaxed" style="color:rgba(239,239,239,.4);">
+                    Recuerda que tu puntuación se cargará desde el ranking global y solo se actualizará si superas tu mejor marca.
+                </p>
+            </div>
+            <div class="flex gap-3 mt-4">
+                <button id="confirm-back-btn" class="flex-1 font-bold py-3 rounded-xl text-sm uppercase transition" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.12);">← Volver</button>
+                <button id="confirm-yes-btn" class="btn-fox flex-1 py-3 text-sm">¡Soy yo! ✅</button>
+            </div>
         </div>
     </div>
 
@@ -400,7 +421,7 @@
         <div class="modal-box animate-slide-up" style="max-width:500px;">
             <div class="flex items-center justify-between mb-5">
                 <div>
-                    <h2 class="text-xl font-black uppercase" style="color:#EFEFEF;">🏆 Ranking General</h2>
+                    <h2 class="text-xl font-extrabold uppercase" style="color:#EFEFEF;">🏆 Ranking General</h2>
                     <p class="text-xs font-semibold mt-0.5" style="color:rgba(239,239,239,.4);">Mejor puntaje por jugador</p>
                 </div>
                 <button onclick="closeRanking()" class="w-9 h-9 rounded-full flex items-center justify-center font-black text-lg" style="background:rgba(250,75,70,.15);color:#FA4B46;border:1px solid rgba(250,75,70,.3);">✕</button>
@@ -752,7 +773,7 @@
                 <div class="lb-bar" ${isMe ? 'style="border-color:rgba(250,75,70,.7);box-shadow:0 0 8px rgba(250,75,70,.3);"' : ''}>
                     <div class="lb-bar-fill ${medal}" style="--bar-w:${pct}%;"></div>
                     <img class="lb-avatar" src="${entry.photo}" alt="" onerror="this.style.background='#FA4B46';this.src='';">
-                    <span class="lb-name">${isMe ? '⭐ ' : ''}${entry.name.split(' ').slice(0,2).join(' ')}</span>
+                    <span class="lb-name">${isMe ? '⭐ ' : ''}${entry.name}</span>
                     <span class="lb-score">${entry.score}</span>
                 </div>
             </div>`;
@@ -790,29 +811,52 @@
         renderPlayerList(filtered);
     }
 
+    // ── MODAL DE CONFIRMACIÓN ──
+    let _pendingPlayer = null; // jugador pendiente de confirmar
+
+    function showConfirmModal(name, photo) {
+        _pendingPlayer = { name, photo };
+        document.getElementById('confirm-avatar').src = photo;
+        document.getElementById('confirm-name').textContent = name;
+        document.getElementById('modal-confirm-player').classList.remove('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('confirm-yes-btn').addEventListener('click', function() {
+            if (_pendingPlayer) {
+                document.getElementById('modal-confirm-player').classList.add('hidden');
+                selectPlayer(_pendingPlayer.name, _pendingPlayer.photo);
+                _pendingPlayer = null;
+            }
+        });
+        document.getElementById('confirm-back-btn').addEventListener('click', function() {
+            _pendingPlayer = null;
+            document.getElementById('modal-confirm-player').classList.add('hidden');
+        });
+    });
+
     function renderPlayerList(list) {
         const container = document.getElementById('player-list');
         if (!list.length) {
             container.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,.35);padding:12px;text-align:center;">No se encontró ese nombre.</p>';
             return;
         }
-        container.innerHTML = list.map((emp, i) => `
+        container.innerHTML = list.map((emp) => `
             <div class="player-item" data-name="${emp.name.replace(/"/g,'&quot;')}" data-photo="${emp.photo}">
                 <img src="${emp.photo}" alt="" onerror="this.style.background='#FA4B46';">
                 <span>${emp.name}</span>
             </div>
         `).join('');
 
-        // Attach click handlers directly (avoids inline onclick encoding issues)
         container.querySelectorAll('.player-item').forEach(el => {
             el.addEventListener('click', function(e) {
                 e.stopPropagation();
-                selectPlayer(this.dataset.name, this.dataset.photo);
+                showConfirmModal(this.dataset.name, this.dataset.photo);
             });
             el.addEventListener('touchend', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                selectPlayer(this.dataset.name, this.dataset.photo);
+                showConfirmModal(this.dataset.name, this.dataset.photo);
             });
         });
     }
@@ -827,7 +871,7 @@
         const asideAvatar = document.getElementById('aside-player-avatar');
         if (asideInfo) {
             asideInfo.classList.remove('hidden');
-            asideName.textContent = name.split(' ').slice(0,2).join(' ');
+            asideName.textContent = name;
             asideAvatar.src = photo;
         }
 
@@ -1912,7 +1956,7 @@
             }
 
             state.floatingTexts.push({
-                text: 'Happy 12th Birthday Fox',
+                text: 'Happy 12th Birthday FOX',
                 x: state.width / 2,
                 y: 350,
                 vy: -0.08,
