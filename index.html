@@ -68,9 +68,10 @@
             display: grid;
             grid-template-columns: minmax(280px, 390px) minmax(300px, 540px);
             gap: 28px;
-            align-items: center;
+            align-items: start;
             justify-content: center;
             padding: 28px;
+            padding-top: 40px;
         }
 
         #desktop-instructions {
@@ -725,9 +726,31 @@
         return _leaderboardCache;
     }
 
+    // ── DEADLINE: 9:30pm Colombia (UTC-5) = 10:30pm NY (UTC-4) = 02:30 UTC Jun 12 ──
+    const RANKING_DEADLINE = new Date('2026-06-12T02:30:00Z');
+
+    function isRankingClosed() {
+        return new Date() >= RANKING_DEADLINE;
+    }
+
+    function getCountdownText() {
+        const now = new Date();
+        const diff = RANKING_DEADLINE - now;
+        if (diff <= 0) return null;
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        if (h > 0) return `${h}h ${m}m restantes`;
+        if (m > 0) return `${m}m ${s}s restantes`;
+        return `${s}s restantes`;
+    }
+
     // ── ENVIAR PUNTAJE A GOOGLE SHEETS ──
     async function updatePlayerScore(score) {
         if (!currentPlayer) return;
+
+        // ⛔ Ranking cerrado después de las 9:30pm Colombia
+        if (isRankingClosed()) return;
 
         // Verificar si es mejor que el cache local primero
         const existing = _leaderboardCache.find(e => e.name === currentPlayer.name);
@@ -755,29 +778,62 @@
 
     // ── CONSTRUIR HTML DE FILAS DEL LEADERBOARD ──
     function buildLeaderboardRows(data, limit) {
+        // Banner: countdown o cerrado
+        const closed = isRankingClosed();
+        const countdown = getCountdownText();
+
+        const banner = closed ? `
+            <div style="background:linear-gradient(135deg,rgba(250,75,70,.15),rgba(250,75,70,.08));border:1px solid rgba(250,75,70,.4);border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:18px;">🔒</span>
+                <div>
+                    <div style="font-size:11px;font-weight:900;color:#FA4B46;text-transform:uppercase;letter-spacing:.05em;">Ranking Cerrado</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,.45);font-weight:600;">Los puntajes finales quedaron registrados. ¡Puedes seguir jugando!</div>
+                </div>
+            </div>` : `
+            <div id="lb-countdown-banner" style="background:linear-gradient(135deg,rgba(250,204,21,.12),rgba(250,204,21,.06));border:1px solid rgba(250,204,21,.35);border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:18px;">⏳</span>
+                <div>
+                    <div style="font-size:11px;font-weight:900;color:#facc15;text-transform:uppercase;letter-spacing:.05em;">Ranking cierra en <span id="lb-countdown">${countdown}</span></div>
+                    <div style="font-size:10px;color:rgba(255,255,255,.45);font-weight:600;">Hoy 10:30pm NY</div>
+                </div>
+            </div>`;
+
         if (!data || data.length === 0) {
-            return '<p style="font-size:12px;color:rgba(255,255,255,.3);font-weight:600;text-align:center;padding:8px;">Aún no hay puntajes. ¡Sé el primero!</p>';
+            return banner + '<p style="font-size:12px;color:rgba(255,255,255,.3);font-weight:600;text-align:center;padding:8px;">Aún no hay puntajes. ¡Sé el primero!</p>';
         }
+
         const top = limit ? data.slice(0, limit) : data;
         const maxScore = top[0].score || 1;
         const rankMedals = ['gold', 'silver', 'bronze'];
 
-        return top.map((entry, i) => {
+        const rows = top.map((entry, i) => {
             const pct = Math.max(18, Math.round((entry.score / maxScore) * 100));
             const medal = rankMedals[i] || '';
             const rankLabel = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`;
             const isMe = currentPlayer && entry.name === currentPlayer.name;
+            const isTop24 = i < 24;
+
+            // Highlight top 24 con borde dorado sutil cuando el ranking está cerrado
+            const top24Style = (closed && isTop24 && !medal)
+                ? 'border-color: rgba(255,215,0,.35); background: rgba(255,215,0,.04);'
+                : '';
+            const top24Badge = (closed && isTop24 && i >= 3)
+                ? '<span style="position:relative;z-index:3;font-size:9px;font-weight:900;color:#FFD700;background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.3);border-radius:6px;padding:2px 5px;flex-shrink:0;margin-right:4px;">TOP 24</span>'
+                : '';
+
             return `
             <div class="lb-bar-wrap">
                 <span class="lb-rank ${medal}">${rankLabel}</span>
-                <div class="lb-bar" ${isMe ? 'style="border-color:rgba(250,75,70,.7);box-shadow:0 0 8px rgba(250,75,70,.3);"' : ''}>
+                <div class="lb-bar" style="${isMe ? 'border-color:rgba(250,75,70,.7);box-shadow:0 0 8px rgba(250,75,70,.3);' : ''}${top24Style}">
                     <div class="lb-bar-fill ${medal}" style="--bar-w:${pct}%;"></div>
                     <img class="lb-avatar" src="${entry.photo}" alt="" onerror="this.style.background='#FA4B46';this.src='';">
                     <span class="lb-name">${isMe ? '⭐ ' : ''}${entry.name}</span>
-                    <span class="lb-score">${entry.score}</span>
+                    <span class="lb-score" style="display:flex;align-items:center;gap:5px;">${top24Badge}${entry.score}</span>
                 </div>
             </div>`;
         }).join('');
+
+        return banner + rows;
     }
 
     async function renderAllLeaderboards() {
@@ -793,9 +849,14 @@
     // ── MODAL RANKING ──
     function openRanking() {
         document.getElementById('modal-ranking').classList.remove('hidden');
-        // Mostrar spinner mientras carga
         const fullLb = document.getElementById('full-leaderboard');
-        if (fullLb) fullLb.innerHTML = '<p style="font-size:12px;color:rgba(255,255,255,.35);text-align:center;padding:16px;">⏳ Cargando ranking...</p>';
+        if (fullLb) {
+            if (isRankingClosed()) {
+                fullLb.innerHTML = buildLeaderboardRows([], null); // muestra solo el banner cerrado mientras carga
+            } else {
+                fullLb.innerHTML = '<p style="font-size:12px;color:rgba(255,255,255,.35);text-align:center;padding:16px;">⏳ Cargando ranking...</p>';
+            }
+        }
         fetchLeaderboard(true).then(data => {
             if (fullLb) fullLb.innerHTML = buildLeaderboardRows(data, null);
         });
@@ -920,6 +981,20 @@
     setInterval(() => {
         fetchLeaderboard(true).then(() => renderAllLeaderboards());
     }, 30000);
+
+    // Ticker del countdown cada segundo
+    setInterval(() => {
+        const el = document.getElementById('lb-countdown');
+        if (el) {
+            const t = getCountdownText();
+            if (t) {
+                el.textContent = t;
+            } else {
+                // Acaba de cerrar — re-renderizar todo con banner cerrado
+                renderAllLeaderboards();
+            }
+        }
+    }, 1000);
 
     </script>
 
