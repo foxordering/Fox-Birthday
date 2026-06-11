@@ -1617,7 +1617,7 @@
             ctx.fillStyle = '#3b82f6';
             ctx.fillRect(0, height * 0.58, width, height * 0.08);
             ctx.fillStyle = '#ffffff';
-            ctx.font = "italic bold 17px 'Arial Black', sans-serif";
+            ctx.font = "italic bold 17px 'Montserrat', 'Arial Black', sans-serif";
             ctx.textAlign = 'center';
             ctx.fillText("⚽ COPA FOXITO 2026 • SELECCIÓN ⚽", width / 2, height * 0.635);
 
@@ -2023,9 +2023,10 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
+                ctx.lineJoin = 'round'; ctx.miterLimit = 2;
                 ctx.font = "900 44px 'Montserrat', 'Arial Black', Impact, sans-serif";
-                ctx.lineWidth = 9;
-                ctx.strokeStyle = 'rgba(15, 23, 42, 0.92)';
+                ctx.lineWidth = 8;
+                ctx.strokeStyle = 'rgba(180, 50, 0, 0.7)';
                 ctx.fillStyle = '#facc15';
                 ctx.shadowColor = 'rgba(250, 204, 21, 0.85)';
                 ctx.shadowBlur = 22;
@@ -2033,10 +2034,10 @@
                 ctx.fillText('Happy 12th', 0, 0);
 
                 ctx.font = "900 42px 'Montserrat', 'Arial Black', Impact, sans-serif";
-                ctx.strokeText('Birthday Fox', 0, 48);
-                ctx.fillText('Birthday Fox', 0, 48);
+                ctx.strokeText('Anniversary FOX', 0, 48);
+                ctx.fillText('Anniversary FOX', 0, 48);
 
-                ctx.font = "800 18px system-ui, sans-serif";
+                ctx.font = "800 18px 'Montserrat', sans-serif";
                 ctx.lineWidth = 5;
                 ctx.fillStyle = '#ffffff';
                 ctx.shadowBlur = 10;
@@ -2330,6 +2331,7 @@
                 ctx.save();
                 ctx.globalAlpha = t.alpha;
                 ctx.fillStyle = t.color;
+                ctx.lineJoin = 'round'; ctx.miterLimit = 2;
                 ctx.font = `bold ${t.size}px 'Montserrat', 'Arial Black', sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.shadowColor = 'rgba(0,0,0,0.6)';
@@ -2344,6 +2346,7 @@
             if (gameState === 'playing') {
                 ctx.save();
                 ctx.fillStyle = '#ffffff';
+                ctx.lineJoin = 'round'; ctx.miterLimit = 2;
                 ctx.font = "bold 96px 'Montserrat', 'Impact', sans-serif";
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
