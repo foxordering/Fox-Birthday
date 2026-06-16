@@ -755,7 +755,7 @@
     //  CONFIGURACIÓN GOOGLE SHEETS
     //  👉 Pega aquí la URL de tu Apps Script después de publicarlo
     // ════════════════════════════════════════════════════════
-    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyGjkhvA75dicV3hfUKyNhLYNDztXJpvALB3RWxHq0nia4_8GrnEHV4qdrmw-m7ReB5pw/exec';
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycby3NIQ4U-Cb6cuimC1wViNlDoVW-I1pVWbB1yhYDEPGgrmn68f91SBLUCmIhS23z0DxPQ/exec';
 
     const PLAYER_KEY = 'foxito_current_player';
 
@@ -789,6 +789,34 @@
     // ── DEADLINE: 9:30pm Colombia (UTC-5) = 10:30pm NY (UTC-4) = 02:30 UTC Jun 12 ──
     // deadline handled below
 
+    // ── TOP 24 SEMIFINALISTAS ──
+    const _top24Names = new Set([
+        "Maria Fernanda Tiria Serrano",
+        "Mateo Duque Cuervo",
+        "Ingrid Daniela Prieto Prada",
+        "Andres Felipe Villarreal Rojano",
+        "Henry Humberto Caicedo Velasco",
+        "Juan Manuel Cruz Pardo",
+        "Andres Felipe Pedreros",
+        "Diego Alejandro Ramirez Leal",
+        "Michael David Rincon Guerrero",
+        "Mario Fernando Hernandez Vanegas",
+        "Isabella Cristhina Araque Calderon",
+        "Santiago Correa Ospina",
+        "Leonardo Jose Aguilar Peña",
+        "Juan Jose Correa Ospina",
+        "Brian Santiago Arias Barreto",
+        "Nicolas Villalba Saray",
+        "Santiago Tamayo Jaramillo",
+        "Julieth Paulina Guzman Mendoza",
+        "Juan Pablo Guerrero Aguirre",
+        "Cristian Camilo Fajardo Ramirez",
+        "Kevin Daniel Lotero Marin",
+        "Sara Ruiz",
+        "Laura Camila Vega Fierro",
+        "Daniel Mateo Sanchez Granada"
+    ]);
+
     function isRankingClosed() {
         return new Date() >= RANKING_DEADLINE;
     }
@@ -806,11 +834,12 @@
     }
 
     // ── ENVIAR PUNTAJE A GOOGLE SHEETS ──
-    async function updatePlayerScore(score) {
+    async function _privateUpdateScore(score) {
         if (!currentPlayer) return;
 
         // ⛔ Ranking cerrado después de las 9:30pm Colombia
         if (isRankingClosed()) return;
+        if (!_top24Names.has(currentPlayer.name)) return; // solo Top24
 
         // Verificar si es mejor que el cache local primero
         const existing = _leaderboardCache.find(e => e.name === currentPlayer.name);
@@ -822,7 +851,7 @@
         }
         try {
             const params = new URLSearchParams({
-                action: 'save',
+                action: 'save2',
                 name:   currentPlayer.name,
                 photo:  currentPlayer.photo,
                 score:  score
@@ -838,6 +867,7 @@
 
     // ── CONSTRUIR HTML DE FILAS DEL LEADERBOARD ──
     function buildLeaderboardRows(data, limit) {
+        data = (data||[]).filter(e => _top24Names.has(e.name));
         // Banner: countdown o cerrado
         const closed = isRankingClosed();
         const countdown = getCountdownText();
@@ -1370,6 +1400,34 @@
         } catch(e) { console.warn('Top24 fetch error:', e); }
     }
 
+    // ── TOP 24 SEMIFINALISTAS ──
+    const _top24Names = new Set([
+        "Maria Fernanda Tiria Serrano",
+        "Mateo Duque Cuervo",
+        "Ingrid Daniela Prieto Prada",
+        "Andres Felipe Villarreal Rojano",
+        "Henry Humberto Caicedo Velasco",
+        "Juan Manuel Cruz Pardo",
+        "Andres Felipe Pedreros",
+        "Diego Alejandro Ramirez Leal",
+        "Michael David Rincon Guerrero",
+        "Mario Fernando Hernandez Vanegas",
+        "Isabella Cristhina Araque Calderon",
+        "Santiago Correa Ospina",
+        "Leonardo Jose Aguilar Peña",
+        "Juan Jose Correa Ospina",
+        "Brian Santiago Arias Barreto",
+        "Nicolas Villalba Saray",
+        "Santiago Tamayo Jaramillo",
+        "Julieth Paulina Guzman Mendoza",
+        "Juan Pablo Guerrero Aguirre",
+        "Cristian Camilo Fajardo Ramirez",
+        "Kevin Daniel Lotero Marin",
+        "Sara Ruiz",
+        "Laura Camila Vega Fierro",
+        "Daniel Mateo Sanchez Granada"
+    ]);
+
     function isRankingClosed() {
         return new Date() >= RANKING_DEADLINE;
     }
@@ -1387,7 +1445,7 @@
     }
 
     // ── ENVIAR PUNTAJE A GOOGLE SHEETS ──
-    async function updatePlayerScore(score) {
+    async function _privateUpdateScore(score) {
         if (!currentPlayer) return;
 
         // ⛔ Ranking cerrado después de las 9:30pm Colombia
@@ -1420,6 +1478,7 @@
 
     // ── CONSTRUIR HTML DE FILAS DEL LEADERBOARD ──
     function buildLeaderboardRows(data, limit) {
+        data = (data||[]).filter(e => _top24Names.has(e.name));
         // Banner: countdown o cerrado
         const closed = isRankingClosed();
         const countdown = getCountdownText();
@@ -1849,9 +1908,7 @@
     summaryEl.innerHTML = `Tapadas <strong style="color:#ffd34d">${state.score}</strong><br>Mejor marca <strong style="color:#ffd34d">${state.best}</strong>`;
     gameOverScreen.classList.add("visible");
     // Save score (only Top 24)
-    if (typeof updatePlayerScore === "function") {
-      updatePlayerScore(state.score, window._foxStartTime || new Date(), new Date());
-    }
+    _privateUpdateScore(state.score, window._foxStartTime || new Date(), new Date());
     if (typeof renderAllLeaderboards === "function") renderAllLeaderboards();
   }
 
