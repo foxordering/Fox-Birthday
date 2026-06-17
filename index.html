@@ -770,9 +770,16 @@
         return _leaderboardCache;
     }
 
-    // ── DEADLINE: 9:30pm Colombia (UTC-5) = 10:30pm NY (UTC-4) = 02:30 UTC Jun 12 ──
-    // Cierre de la final: 16 de junio de 2026, 11:59 PM New York.
-    const RANKING_DEADLINE = new Date('2026-06-17T00:00:00-04:00');
+    // ── DEADLINE: 11:00pm NY (UTC-4) ──
+    const RANKING_DEADLINE = new Date('2026-06-16T23:00:00-04:00');
+
+    function normName(s) {
+        return String(s || '')
+            .trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
 
     // ── TOP 24 SEMIFINALISTAS ──
     const _top24Names = new Set([
@@ -802,8 +809,34 @@
         "Daniel Mateo Sanchez Granada"
     ]);
 
+    // ── JUGADOR MARCADO POR REVISIÓN ──
+    const FRAUD_PLAYER_NAME = "Juan Manuel Cruz Pardo";
+    const FRAUD_PLAYER_NORM = normName(FRAUD_PLAYER_NAME);
+
+    function applyFraudRankingRule(data) {
+        data = data || [];
+        const normalRows = data.filter(e => normName(e.name) !== FRAUD_PLAYER_NORM);
+        let fraudRow = data.find(e => normName(e.name) === FRAUD_PLAYER_NORM);
+
+        if (!fraudRow) {
+            const emp = (typeof EMPLOYEES !== 'undefined' ? EMPLOYEES : []).find(e => normName(e.name) === FRAUD_PLAYER_NORM);
+            fraudRow = {
+                name: FRAUD_PLAYER_NAME,
+                photo: emp ? emp.photo : '',
+                score: 0,
+                fraud: true
+            };
+        } else {
+            fraudRow = Object.assign({}, fraudRow, { fraud: true });
+        }
+
+        return normalRows.concat([fraudRow]);
+    }
+
     function isRankingClosed() {
-        return new Date() >= RANKING_DEADLINE;
+        if (typeof RANKING_DEADLINE === 'undefined') return false;
+        if (!RANKING_DEADLINE || isNaN(RANKING_DEADLINE.getTime())) return false;
+        return new Date().getTime() >= RANKING_DEADLINE.getTime();
     }
 
     function getCountdownText() {
@@ -819,11 +852,11 @@
     }
 
     // ── ENVIAR PUNTAJE A GOOGLE SHEETS ──
-    async function _privateUpdateScore(score, startTime = window._foxStartTime || new Date(), endTime = new Date()) {
+    async function _privateUpdateScore(score) {
         if (!currentPlayer) return;
 
-        // ⛔ Ranking cerrado después del deadline configurado
-        if (typeof RANKING_DEADLINE !== 'undefined' && new Date() >= RANKING_DEADLINE) return;
+        // ⛔ Ranking cerrado después de las 9:30pm Colombia
+        if (isRankingClosed()) return;
         if (!_top24Names.has(currentPlayer.name)) return; // solo Top24
 
         // Verificar si es mejor que el cache local primero
@@ -834,28 +867,14 @@
             console.warn('Configura SHEET_URL para guardar puntajes en la nube.');
             return;
         }
-
-        const startDate = new Date(startTime || Date.now());
-        const endDate = new Date(endTime || Date.now());
-        const duration = Math.max(0, Math.round((endDate - startDate) / 1000));
-
         try {
             const params = new URLSearchParams({
                 action: 'save2',
-                name: currentPlayer.name.trim(),
-                photo: currentPlayer.photo || '',
-                score: String(score),
-                startTime: startDate.toISOString(),
-                endTime: endDate.toISOString(),
-                duration: String(duration)
+                name:   currentPlayer.name,
+                photo:  currentPlayer.photo,
+                score:  score
             });
-            const res = await fetch(`${SHEET_URL}?${params.toString()}`);
-            const json = await res.json();
-            console.log('Respuesta Sheets save2:', json);
-            if (!json.ok) {
-                console.warn('Sheets rechazó el puntaje:', json.error);
-                return;
-            }
+            await fetch(`${SHEET_URL}?${params}`);
             // Refrescar leaderboard después de guardar
             await fetchLeaderboard(true);
             renderAllLeaderboards();
@@ -883,7 +902,7 @@
                 <span style="font-size:18px;">⏳</span>
                 <div>
                     <div style="font-size:11px;font-weight:900;color:#facc15;text-transform:uppercase;letter-spacing:.05em;">Ranking cierra en <span id="lb-countdown">${countdown}</span></div>
-                    <div style="font-size:10px;color:rgba(255,255,255,.45);font-weight:600;">Hoy 10:30pm NY</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,.45);font-weight:600;">Hoy 11:00pm NY</div>
                 </div>
             </div>`;
 
@@ -891,6 +910,7 @@
             return banner + '<p style="font-size:12px;color:rgba(255,255,255,.3);font-weight:600;text-align:center;padding:8px;">Aún no hay puntajes. ¡Sé el primero!</p>';
         }
 
+        data = applyFraudRankingRule(data);
         const top = limit ? data.slice(0, limit) : data;
         const maxScore = top[0].score || 1;
         const rankMedals = ['gold', 'silver', 'bronze'];
@@ -898,26 +918,31 @@
         const rows = top.map((entry, i) => {
             const pct = Math.max(18, Math.round((entry.score / maxScore) * 100));
             const medal = rankMedals[i] || '';
-            const rankLabel = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`;
+            const isFraud = entry.fraud === true || normName(entry.name) === FRAUD_PLAYER_NORM;
+            const rankLabel = isFraud ? `${i + 1}` : (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`);
             const isMe = currentPlayer && entry.name === currentPlayer.name;
             const isTop24 = i < 24;
 
             // Highlight top 24 con borde dorado sutil cuando el ranking está cerrado
-            const top24Style = (closed && isTop24 && !medal)
+            const top24Style = (closed && isTop24 && !medal && !isFraud)
                 ? 'border-color: rgba(255,215,0,.35); background: rgba(255,215,0,.04);'
                 : '';
-            const top24Badge = (closed && isTop24 && i >= 3)
+            const top24Badge = (closed && isTop24 && i >= 3 && !isFraud)
                 ? '<span style="position:relative;z-index:3;font-size:9px;font-weight:900;color:#FFD700;background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.3);border-radius:6px;padding:2px 5px;flex-shrink:0;margin-right:4px;">TOP 24</span>'
                 : '';
+            const fraudStyle = isFraud ? 'border-color:rgba(250,75,70,.85);background:rgba(250,75,70,.08);box-shadow:0 0 10px rgba(250,75,70,.22);' : '';
+            const fraudBadge = isFraud ? '<span style="position:relative;z-index:3;font-size:9px;font-weight:900;color:#fff;background:#FA4B46;border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:2px 6px;margin-left:6px;flex-shrink:0;">FRAUDE</span>' : '';
+            const fraudNameStyle = isFraud ? 'text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:#FA4B46;color:rgba(255,255,255,.55);' : '';
+            const scoreHtml = isFraud ? 'FRAUDE' : `${top24Badge}${entry.score}`;
 
             return `
             <div class="lb-bar-wrap">
                 <span class="lb-rank ${medal}">${rankLabel}</span>
-                <div class="lb-bar" style="${isMe ? 'border-color:rgba(250,75,70,.7);box-shadow:0 0 8px rgba(250,75,70,.3);' : ''}${top24Style}">
+                <div class="lb-bar" style="${isMe ? 'border-color:rgba(250,75,70,.7);box-shadow:0 0 8px rgba(250,75,70,.3);' : ''}${top24Style}${fraudStyle}">
                     <div class="lb-bar-fill ${medal}" style="--bar-w:${pct}%;"></div>
                     <img class="lb-avatar" src="${entry.photo}" alt="" onerror="this.style.background='#FA4B46';this.src='';">
-                    <span class="lb-name">${isMe ? '⭐ ' : ''}${entry.name}</span>
-                    <span class="lb-score" style="display:flex;align-items:center;gap:5px;">${top24Badge}${entry.score}</span>
+                    <span class="lb-name" style="${fraudNameStyle}">${isMe && !isFraud ? '⭐ ' : ''}${entry.name}</span>${fraudBadge}
+                    <span class="lb-score" style="display:flex;align-items:center;gap:5px;">${scoreHtml}</span>
                 </div>
             </div>`;
         }).join('');
@@ -1094,7 +1119,337 @@
     </script>
 
 
-    
+    <script>
+    // ── DATOS DE EMPLEADOS ──
+    const EMPLOYEES = [
+      {name:"Adriana Maria Carrillo Trujillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07JB526QLT-c620afec14ac-512"},
+      {name:"Adriana Santamaria Osorio",photo:"https://ca.slack-edge.com/TK3E9TUMC-U069KFJ9BQB-a02164703f7b-512"},
+      {name:"Ailyn Alicia Afanador Linero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06QN4PFGBH-45f76d13dce5-512"},
+      {name:"Alejandra Garcia Giraldo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08FKE5PR7X-90799ae42e54-512"},
+      {name:"Alejandra Leon Gamez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AQN85PDGB-e5a9f6ad12d2-512"},
+      {name:"Alejandro Gomez Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07CUBK3H25-603de31be986-512"},
+      {name:"Alejandro Navia Ortiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05M6KR84FR-365b9c805476-512"},
+      {name:"Alvaro Jose Campo Vasquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09HHG5DMV0-f4fc8150a3ad-512"},
+      {name:"Ana Marcela Sierra Arrieta",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07SLAYQYRG-1981b90de719-512"},
+      {name:"Ana Maria Cuadros Arias",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05FB2WRVL3-6bdebeb219ea-512"},
+      {name:"Andrea Carolina Barrios Carbo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U056A999E3H-20f4c9538808-512"},
+      {name:"Andrea Giraldo Chavez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04KP92JZ0X-08225c41906f-512"},
+      {name:"Andrea Jimenez Carreño",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088L70F41F-a037049535a9-512"},
+      {name:"Andrea Valentina Perez Banquet",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0894CMG2G5-a1f3a04f92a6-512"},
+      {name:"Andrei Mauricio Amador Sanchez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AJFFT222X-3bcc582366a1-512"},
+      {name:"Andres Eduardo Manosalva Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AC6NVPJ6R-391cf065d8af-512"},
+      {name:"Andres Fabian Moreno Jimenez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ALD9ESH8T-125555d81567-512"},
+      {name:"Andres Felipe Calderon Ardila",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09HD62J32N-75ac7f40ad36-512"},
+      {name:"Andres Felipe Gonzalez Pastrana",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AHU116-f70472703408-512"},
+      {name:"Andres Felipe Navarro Ojeda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08CL2AKU0J-e90af884a44f-512"},
+      {name:"Andres Felipe Pedreros",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07A6EZ2JHE-03d48cca650c-512"},
+      {name:"Andres Felipe Villarreal Rojano",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0880T6EQ4E-389836c5a10a-512"},
+      {name:"Andry Patricia Hoyos Perez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08V5KGNA3T-4a62adcafc83-512"},
+      {name:"Angel Eduardo Hernandez Cubillan",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09NBUXA351-3489fe96281f-512"},
+      {name:"Angel Silvana Milian Pinto",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088A1RG5V2-45f1a86c91b4-192"},
+      {name:"Angela Maria Gonzalez Toscano",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07A671RGT0-6b46ad7c8fd1-512"},
+      {name:"Angela Yuliana Salamanca Montenegro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AR7GH5M25-fb90398b0de0-512"},
+      {name:"Angelica Maria Trillos Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07NA7VTFS4-06c0be30a225-512"},
+      {name:"Angie Milena Moros Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AKLLCQ-55e136f10c79-512"},
+      {name:"Angie Vivanco Martinez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08EHMPNLPM-12d3f8165a64-512"},
+      {name:"Annie Marcela Osorio Marquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06R55F4N76-ea87f7f9f04f-512"},
+      {name:"Antonio Esteban Escobar",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05G84YUENQ-26d85e21be67-512"},
+      {name:"Brayan Alejandro Aldana Bolaños",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AT14AB3B2-768402108c8a-512"},
+      {name:"Brian Santiago Arias Barreto",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08B639QNHK-203e8629334d-512"},
+      {name:"Brigit Andrea Peña Garavito",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07CFJ3KU8K-125207d65aee-512"},
+      {name:"Camila Loaiza Orozco",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08ED6NCE01-92ba45f00146-512"},
+      {name:"Camila Moreno Higuita",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07MTEXB0A3-47eb1a2b7a36-512"},
+      {name:"Camilo Andres Anillo Yepes",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05TSEFKBB6-3b6ff631377b-512"},
+      {name:"Camilo Andres Bajonero Cortes",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHLR16JGM-2b2dad0b0d1b-512"},
+      {name:"Camilo Piedrahita Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0648CWANSH-426cbf0e9e4a-512"},
+      {name:"Carlos Andres Piedrahita Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07HWMAL73R-b76d7057d6f7-512"},
+      {name:"Carlos Felipe Pico Bedoya",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0889051XJN-f8c98ed0660e-512"},
+      {name:"Carlos Fernando Colorado Rivera",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06R2HZRJE7-a9e86b8f7259-512"},
+      {name:"Carlos Leonardo Florez Alvarado",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AKDQLGD50-2ebad04e8a38-512"},
+      {name:"Carmen Sofia Mendoza Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08S1F87EEL-af99e0f1463e-512"},
+      {name:"Carolina Garcia Morales",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05H0HFJ3NU-2e249f68f311-512"},
+      {name:"Carolina Pears Posada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03L4052ETS-348c92e3f41c-512"},
+      {name:"Cesar Augusto Castaño Carvajal",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AFR01E-4e90ca4afc00-512"},
+      {name:"Charles Giovanni Perez Arguello",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07H3625AUQ-78833bdf7e05-512"},
+      {name:"Cindy Yurany Gallego",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0528PTBG7J-8ef7b44cffbc-512"},
+      {name:"Claudia Vanessa Aristizabal Lindarte",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09GA9GA2JE-cd260c8e564f-512"},
+      {name:"Claudia Viviana Agudelo Marulanda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05PU65CQA0-cb73b805e95c-512"},
+      {name:"Cristhian Fernando Villada Quintero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U049RQZUREH-c500753c0e49-512"},
+      {name:"Cristian Camilo Fajardo Ramirez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AQR7F2JMT-bb12043c37d4-512"},
+      {name:"Cristian Fernando Santacruz Jimenez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A6JQ41Z37-ef3074694f63-512"},
+      {name:"Daniel De Jesus Munera Henao",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07Q2RZ1LS3-2420ba3036c2-512"},
+      {name:"Daniel Felipe Tellez Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05T3836TR7-d12dfa4c91b0-512"},
+      {name:"Daniel Mateo Sanchez Granada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05SHVB1KP0-5de2a842d9c3-512"},
+      {name:"Daniela Alexandra Garrido Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05EWL23VMM-efd2357243a7-512"},
+      {name:"Daniela Franco Herrera",photo:"https://ca.slack-edge.com/TK3E9TUMC-U049UKR93FV-b0a2e448e386-512"},
+      {name:"Daniela Giraldo Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07D4F8UXPS-c2a7e426da16-512"},
+      {name:"Daniela Gutierrez Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05R2NQ7803-f167cd0e3491-512"},
+      {name:"Daniela Jimenez Vasquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08RBGUBLEB-d13a89561af5-512"},
+      {name:"Danna Catherine Botia Cabezas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088A1RETFW-a1bd46899dff-512"},
+      {name:"David Mendoza Arevalo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08RBGTQ6DV-5d58981db64c-512"},
+      {name:"David Ricardo Sanchez Franco",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04DB7KC8BV-5d9b78597fe6-512"},
+      {name:"Dayanna Isabel Diaz Chaves",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07QKTBL0CU-cd701ccefa92-512"},
+      {name:"Derly Ovallos Garcia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09LL965U3D-a75d90b65d0b-512"},
+      {name:"Diana Calderon Sepulveda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U054DMKGP61-615fc46e14ad-512"},
+      {name:"Diana Katerine Antonio Mongui",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07CUBJMZCZ-22a2955f6395-512"},
+      {name:"Diana Paola Cruz Sosa",photo:"https://ca.slack-edge.com/TK3E9TUMC-U091FRB5MMY-8d720ca63cbb-512"},
+      {name:"Diego Alejandro Ramirez Leal",photo:"https://ca.slack-edge.com/TK3E9TUMC-U058ZP3FJPN-ba29b9e55332-512"},
+      {name:"Diego Jesus Medina Ovalles",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09NJ3MF9LJ-aca9a17f32a1-512"},
+      {name:"Douglas Jose Franco Villarroel",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04J0UUP5HS-d2f10d56c7e5-512"},
+      {name:"Douglis Del Valle Franco Villarroel",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08PW03ME0K-2d378abbe9e9-512"},
+      {name:"Edwin Steven Burkhardt Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U078Z9Q207J-6cc331b70f88-512"},
+      {name:"Eliana Gabriela Gomez Ferro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AGDR14Q67-a4d08dd286e0-512"},
+      {name:"Eliana Maria Suarez Baquero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08Q6BYHY03-07d721e9d5ac-512"},
+      {name:"Emmanuel Galindo Sanchez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AV0RT2G77-fb5be3aa1242-192"},
+      {name:"Erika Alejandra Rivera Padua",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0899P39V52-8d98b5c7ee62-512"},
+      {name:"Erika Andrea Chamorro Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07A671QNVC-491bc7f2e2df-512"},
+      {name:"Erika Martinez Martinez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AKZ214G5N-03c4c408f678-512"},
+      {name:"Erika Tatiana Rodriguez Ordonez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ATYCGLCCU-5f92f7668075-192"},
+      {name:"Erika Yamile Martinez Rios",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AKQ4RW-5aa9fa24e09a-512"},
+      {name:"Esneider Leonardo Melo Suarez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B0JG9UW8Y-38302ab30179-512"},
+      {name:"Esteban Agudelo Ramirez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09NMKKCS20-6fd5bc5f34d1-512"},
+      {name:"Evanyelis Beatriz Payares Ospino",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06J34PKN4D-7593bb5e2688-512"},
+      {name:"Fabian Eduardo Rincon Vesga",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07FZRFHTM5-a6d2af6fada2-512"},
+      {name:"Gabriel Andres Mercado Salas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04UTGVPJR1-37967eed3141-512"},
+      {name:"Gelary Gabriela Manosalva Quiñones",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06QW2HU36J-1b35d7d8ab7e-512"},
+      {name:"Geraldine Mazo Restrepo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0762V3TS90-1422fcb83b94-512"},
+      {name:"Geraldine Sofia Zambrano Calderon",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09JT1JK4LW-a1bce71f64be-512"},
+      {name:"Gina Fernanda Gutierrez Arias",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07GE91NRV1-8d64b52bc1a9-512"},
+      {name:"Ginna Candelaria Medina Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04L0SJQX1B-877ad42c7efc-512"},
+      {name:"Gloria Ines Marca Ortiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05PRNDSG10-fb8efdea38ea-512"},
+      {name:"Gustavo Grande Mariscal",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05MJ8K6UHK-a5ff71404b7a-512"},
+      {name:"Heidy Paola Pulido Castañeda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U075NCPRKEK-85b525717e3c-512"},
+      {name:"Henry Humberto Caicedo Velasco",photo:"https://ca.slack-edge.com/TK3E9TUMC-U060WF38WJC-f5d581f13201-512"},
+      {name:"Ingrid Daniela Prieto Prada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07001T5P6Y-0bee48f13b9d-512"},
+      {name:"Irianimar Pacheco Sulbaran",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AV26JQT2A-5ba2c96e0d22-512"},
+      {name:"Isabella Cristhina Araque Calderon",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08PW02FL1Z-f79b384a6c28-512"},
+      {name:"Isabella Villalba Saray",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08N7PCPBB5-406351ec9346-512"},
+      {name:"Isley Valentina Sanchez Wilches",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07LBG3BPEE-75e1cdbffc03-512"},
+      {name:"Ivon Lorena Barrera Contreras",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08NXQTSCGJ-682e571dd24c-512"},
+      {name:"Jackeline Carolina Gracey Sanmiguel",photo:"https://ca.slack-edge.com/TK3E9TUMC-U028YN2DN3E-0e548fe7e35b-512"},
+      {name:"Jacobo Ladino Baena",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088WAJRAGG-0ca803af6c75-512"},
+      {name:"Jaime Andres Valencia Gaviria",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06MKVB1C74-df9ce869d7a7-512"},
+      {name:"Jairo Enrique Pico Morales",photo:"https://ca.slack-edge.com/TK3E9TUMC-U013TAB02K1-9620f6100630-512"},
+      {name:"Javier Leal Velasquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AFZ504JKF-0f5b27bae28e-512"},
+      {name:"Jean Marco Bendezu",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088FLJG170-97843eeb6d05-512"},
+      {name:"Jennifer Paola Burkhardt Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05PNQZAJBX-a6a835b643d4-512"},
+      {name:"Jenny Del Carmen Cepeda Ebratt",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AFLAPKY4X-1b4a7253f780-512"},
+      {name:"Jesica Ayelen Glabor",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06B27M1G57-648dad894fe6-512"},
+      {name:"Jessica Alejandra Gallego Estrada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07R66HB6C8-4571132f8c57-512"},
+      {name:"Jessica Paola Carvajal Tovar",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06G8HVT37B-8bea9dcc3221-512"},
+      {name:"Jesus Alberto Garcia Zurita",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03TMHR0WF7-14b8f68881d4-512"},
+      {name:"Jesus Alberto Ramirez Ramirez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U02S1FMNR8T-37b72a96db92-512"},
+      {name:"Jesus Daniel Garcia Neira",photo:"https://ca.slack-edge.com/TK3E9TUMC-U094U6D8073-16fa15fe5329-512"},
+      {name:"Jhojan Stiven Duque Chavarro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHN6523HC-865e783a966c-512"},
+      {name:"Jhonattan Alexis Melgarejo Ritiva",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AKHMCL69F-660deb9a53c2-512"},
+      {name:"Johann Islen Leon Rojas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07GE91U48K-20adc8374c29-512"},
+      {name:"Johanna Jasbleidy Romero Cabezas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0880T65VJS-0f828acb2293-512"},
+      {name:"John Deiby Motta Murillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088L714HT3-81478fdd585e-512"},
+      {name:"Jorge Eduardo Jimeno Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03KGK0HZ2Q-521f51fdee60-512"},
+      {name:"Jorge Enrique Landazabal Viveros",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07C14ZVA5D-b7496d115c3b-512"},
+      {name:"Jose Alejandro Briceño Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07AVQCGH2Q-3a834c0040e6-512"},
+      {name:"Jose Luis Varela Sanchez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07SDMZJZT8-6bfabd0ab90e-512"},
+      {name:"Jose Nicolas Forero Urrego",photo:"https://ca.slack-edge.com/TK3E9TUMC-U075WAJ2NJ2-4f30f465104e-512"},
+      {name:"Joshua Felipe Delgado Murcia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AUE12BK6F-93b88fd8da76-512"},
+      {name:"Juan Alejandro Carvajal Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B5Q3212TS-6286777c280c-512"},
+      {name:"Juan Camilo Galera Ruiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05KHRX6YKC-be2556ece33c-512"},
+      {name:"Juan Camilo Valencia Cespedes",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07BANZRAHF-4362a5ac6806-512"},
+      {name:"Juan David Moya",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A66PRP5RD-8ea3514fb004-512"},
+      {name:"Juan Diego Arevalo Vergara",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04FHT2M2HE-07ea4f5a27ea-512"},
+      {name:"Juan Diego Quintero Perez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U049X7KEHQU-42840cc05ebb-512"},
+      {name:"Juan Esteban Aristizabal Lindarte",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07A6EXL43S-0cc806db74af-512"},
+      {name:"Juan Jose Correa Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U046GNYLVGX-6a21d7a3c370-512"},
+      {name:"Juan Jose Fajardo Lotero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09ENME7PQE-5132f17ec786-512"},
+      {name:"Juan Jose Motato Pears",photo:"https://ca.slack-edge.com/TK3E9TUMC-U079Y980Z47-8357d00522a7-512"},
+      {name:"Juan Luis De La Rosa Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U098MNCFB0C-1f4788ec44ad-512"},
+      {name:"Juan Manuel Cruz Pardo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07ARFUKL9X-2bd6550b23e8-512"},
+      {name:"Juan Manuel Romero Grisales",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03KE7BD798-e4b655d1a23f-512"},
+      {name:"Juan Pablo Beltran Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03HLBEM8A0-9321ba98a9d8-512"},
+      {name:"Juan Pablo Guerrero Aguirre",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08AWEXUUGY-ba5136c960e5-512"},
+      {name:"Juan Pablo Tabares Velasquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04EMJ7S52S-58f1ee337e7d-512"},
+      {name:"Juan Pablo Tellez Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U078D0EMKT6-278f702a7484-512"},
+      {name:"Juan Pico",photo:"https://ca.slack-edge.com/TK3E9TUMC-UK328C8UV-b9b8bcf153c7-512"},
+      {name:"Juan Sebastian Pico",photo:"https://ca.slack-edge.com/TK3E9TUMC-U01K67XHVU0-50bbbc006873-512"},
+      {name:"Juan Sebastian Sanchez Castellanos",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AQSHMHAR4-717997defc64-512"},
+      {name:"Julian Gonzalez Osorio",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05TSEFLZEG-1fee264570b3-512"},
+      {name:"Julian Pico Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U083NRPNV17-80c8e437381b-512"},
+      {name:"Juliana Teresa Robayo Ardila",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0514H97VPZ-6bb1413dc104-512"},
+      {name:"Juliana Triviño Lopez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09CVEBL7PW-3340619eb863-512"},
+      {name:"Julieth Paulina Guzman Mendoza",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08EL9JD8P6-684f43cc4468-512"},
+      {name:"Julio Mario Agudelo Farfan",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04M4QUA29Y-8b4ec49a3bc6-512"},
+      {name:"Junior Enrique Ahumedo De Avila",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05G86RH0HK-e229675d5380-512"},
+      {name:"Justin Alejandra Orellano Guauque",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06DQTC3GE7-1706ef0218f2-512"},
+      {name:"Karen Arelys Cardenas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A6N77D1GS-f9468fe25595-512"},
+      {name:"Karen Yulieth Cortes Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B1FF0CBQD-a1c11b8ab3a9-512"},
+      {name:"Katerine Del Carmen Marquez Machado",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07QBS82K2B-fdc711348e14-512"},
+      {name:"Kelly Alejandra Correa Molina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0899P2CLP6-fdbd54741b12-512"},
+      {name:"Kelly Johanna Mahecha Bejarano",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0884LR9PLM-a9703cb381ef-512"},
+      {name:"Kevin Daniel Lotero Marin",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0787JRA3GV-89d7e534668c-512"},
+      {name:"Kevin Stuart Spadaffora Barreto",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06MKS4L5QT-e79eabb6539b-512"},
+      {name:"Laura Camila Vega Fierro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U071NA11HT9-128f1be2f6d6-512"},
+      {name:"Laura Estefany Zambrano Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07AWTMNF0D-a670e3bc8578-512"},
+      {name:"Laura Isabel Forero Porras",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0607AJH72P-3fd1d4942712-512"},
+      {name:"Laura Manuela Piragauta Fernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05RSGUMUNL-0d49b088ad78-512"},
+      {name:"Laura Patiño Franco",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04LQ910NQ7-0aa600aee30d-512"},
+      {name:"Laura Sanchez Roldan",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08G8GDC4SY-a82ae64cad59-512"},
+      {name:"Laura Ximena Correa Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03UL28HHBR-d262882d7de4-512"},
+      {name:"Lauren Natalia Manotas Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U091FR504CS-318ea5ffb764-512"},
+      {name:"Lauro Jose Henao Gomez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U060DHZ5UCC-0c094be78c56-512"},
+      {name:"Layla Margarita Medina Luna",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08CBPJBJG7-9d9a810dc787-512"},
+      {name:"Leidy Paola Osorio Lozada",photo:"https://ca.slack-edge.com/TK3E9TUMC-U088WAJSDTJ-40bcbf0a4ded-512"},
+      {name:"Leonardo Jose Aguilar Peña",photo:"https://ca.slack-edge.com/TK3E9TUMC-U065RMVJMD1-2d9b5d0e52af-512"},
+      {name:"Lilia Esperanza Castillo Garzon",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ACP3SJYL9-57806810231d-512"},
+      {name:"Lina Andrea Ovalle Silva",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08JNEWGE6A-f52a60577318-512"},
+      {name:"Lineth Luna Herrera",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04RHS9BHJ8-86dc841c64af-512"},
+      {name:"Luis Alfredo Garcia Bernal",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08L88YH07N-ff9429403a80-512"},
+      {name:"Luis David Parra Valencia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B0JGDDLG0-85d1cf380329-512"},
+      {name:"Luz Angela Otalora Chiguasuque",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AFUFC90RG-4c63d0365dc4-512"},
+      {name:"Lycet Mayarit Sanchez Wilches",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04M796KEEQ-240e83d59768-512"},
+      {name:"Maira Alejandra Daza Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07JB87F0F4-0443235206f3-512"},
+      {name:"Manolo Chavarria Garay",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07J8BR5ENR-b7fa4ba30608-512"},
+      {name:"Marcela Maria Murcia Hernandez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04RFCJCRGA-3d5076cdfe67-512"},
+      {name:"Marco Steven Rincon Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06SYGHHBFY-87831cd00f67-512"},
+      {name:"Marcos Eduardo Quintero Bohorquez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05JHDUDQSG-3dda7a36c172-512"},
+      {name:"Margareth Duran Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B4EAMF1D5-20db1b58ea01-512"},
+      {name:"Maria Alejandra Rojas Benavides",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05HBS5HUH1-8dd660310b7b-512"},
+      {name:"Maria Del Pilar Ibarra Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A6L67LC78-5b7fa1dddf0f-512"},
+      {name:"Maria Fernanda Mendez Peña",photo:"https://ca.slack-edge.com/TK3E9TUMC-U079HM89XR8-7220a381996e-512"},
+      {name:"Maria Fernanda Tiria Serrano",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07J8BQFPHB-208bec6fb8bd-512"},
+      {name:"Maria Juliana Rivas Arboleda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AK1BCKQ0M-575ddb80605b-512"},
+      {name:"Maria Nelly Solis Carabali",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHLQZ7T7X-8fe1f9c81a2c-512"},
+      {name:"Maria Paula Castellanos Monroy",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0697E87BEF-84e08f82b87d-512"},
+      {name:"Maria Paula Dangond Castro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08CP0MCCH2-918f5ee952b5-512"},
+      {name:"Maria Paula Navarro Ojeda",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03QASBGQHX-b1fb5a8de9c0-512"},
+      {name:"Mario Fernando Hernandez Vanegas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09HHG6DSPL-ddc401932dfc-512"},
+      {name:"Marisabella Rossi Arrieta Ballestss",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08TR5WB9FX-303d9e161990-512"},
+      {name:"Maritzabel Carmona Guiral",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08JNEXD538-dc8c967f885f-512"},
+      {name:"Mateo Delgado Navarro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AGZBJ0RA5-e05a41eaa615-512"},
+      {name:"Mateo Duque Cuervo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U098MNDP620-f7b322460a9e-512"},
+      {name:"Mauricio Caro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0871C122BZ-a8d445391cb6-512"},
+      {name:"Michael David Rincon Guerrero",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09GA9FM5HQ-be647726e1d6-512"},
+      {name:"Monica Pineda Castaño",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07C14ZSE79-2dd4c0103860-512"},
+      {name:"Natalia Cardona Lenis",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04DB7K9AAF-20d80444405b-512"},
+      {name:"Natalia Pico Saavedra",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04QYMGDTNZ-a5e4f86646ed-512"},
+      {name:"Natalia Ramirez Marin",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0889CVAQ8L-3331d567c896-512"},
+      {name:"Natalia Ramirez Ocampo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07SEJJPX7V-ac72a9360655-512"},
+      {name:"Natalia Zapata Noreña",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHQ818B5Y-af475dc9ca43-512"},
+      {name:"Nataly Dayanna Mendez Astudillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08FKE49G5T-462b8a54ab13-512"},
+      {name:"Nelsy Patricia Gamez Rodriguez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04HHUPCT9D-32f9428c23ce-512"},
+      {name:"Nicolas Monroy Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09M661F6CE-45b48b53e29a-512"},
+      {name:"Nicolas Stiven Pulido Morales",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A66PSDDQF-0898efbac2c8-512"},
+      {name:"Nicolas Villalba Saray",photo:"https://ca.slack-edge.com/TK3E9TUMC-U04FQ2J6SSE-c93ea88c1784-512"},
+      {name:"Pablo Emmanuel Condori",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05PRNE84N6-354b63c484e7-512"},
+      {name:"Paul Andres Ruiz Niño",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AMDUU84UQ-d1b105105798-512"},
+      {name:"Paula Andrea Maturana Castro",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05KB6KVA94-4519e622706b-512"},
+      {name:"Paula Andrea Valentin Acosta",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09HHG6DB8S-c218afadb942-512"},
+      {name:"Pedro Antonio Guerrido Peña",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0B1CFQB7DZ-ceb8e52e293d-512"},
+      {name:"Pedro Armando Roman Ceballos",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09AL014BGV-eece69a05636-512"},
+      {name:"Ricardo Aicardo Paz Lasso",photo:"https://ca.slack-edge.com/TK3E9TUMC-U072FGMEDC1-451a2466c140-512"},
+      {name:"Rodrigo Andres Herrera Perez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U098MNE5YKE-e4c3a6552f1b-512"},
+      {name:"Rosiris Marialec Guerrero Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0A71561A4R-bb7c77ce6771-512"},
+      {name:"Santiago Correa Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U040NJ96VQX-437044c0e60c-512"},
+      {name:"Santiago Pinzon Suarez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AHLR0FG77-aa0567f5bfe1-512"},
+      {name:"Santiago Tamayo Jaramillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08GSB18GUA-9dd431d11ba1-512"},
+      {name:"Sara Ruiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ABUN93JAK-e7130c6745c4-512"},
+      {name:"Sara Valentina Ibarra Rojas",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AAUSB4H0S-92c223e0688e-512"},
+      {name:"Sara Vanessa Rivero Mazzo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ANA8W3MFC-f3b9dbd60460-512"},
+      {name:"Sebastian Varela",photo:"https://ca.slack-edge.com/TK3E9TUMC-U087T09KE1M-0d8a0c880029-512"},
+      {name:"Sofia Arboleda Londoño",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07QH9W6XEX-5db19e9e555f-512"},
+      {name:"Stephany Hernandez Fuenmayor",photo:"https://ca.slack-edge.com/TK3E9TUMC-U05G2PDN23F-81288e08d5da-512"},
+      {name:"Tatiana Orozco Gutierrez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U079EQCAL7P-b19d936b309b-512"},
+      {name:"Tomas Ricardo Llorente Espitia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ATRCDDUCD-e7c3f7df812f-512"},
+      {name:"Valentina Quijano Carrillo",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03FPHKN1KN-b7221870edf7-512"},
+      {name:"Valeria Alvarado Piedrahita",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0944AKQV6C-1572e19c04ce-512"},
+      {name:"Valeria Remedios Vasquez Cuesta",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06THR5L7L1-766fcce9d5f9-512"},
+      {name:"Veronica Trillos Ospina",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06J62CLLN6-5f11fddae3d1-512"},
+      {name:"Violeta Chamorro Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U09GMCVT1FV-4e67d5440055-512"},
+      {name:"Virginia Jose Alvarez Blanchard",photo:"https://ca.slack-edge.com/TK3E9TUMC-U06FVRA5M5H-c887fa7d94c7-512"},
+      {name:"Viviana Millan Constain",photo:"https://ca.slack-edge.com/TK3E9TUMC-U042EQ8984S-3583680abf8a-512"},
+      {name:"William Andres Muñoz Angel",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0AN3SYSX8T-d918cb0208d7-512"},
+      {name:"William Blas De Leon Garcia",photo:"https://ca.slack-edge.com/TK3E9TUMC-U07E3C9A1FG-426a121dec9d-512"},
+      {name:"Ximena Adriana Moncaleano Montes",photo:"https://ca.slack-edge.com/TK3E9TUMC-U03DAQP8KT9-067adbcfa820-512"},
+      {name:"Yonathan Estiben Arias Jimenez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U098MNF09MJ-552df1d038d7-512"},
+      {name:"Yuliana Daza Gonzalez",photo:"https://ca.slack-edge.com/TK3E9TUMC-U0ACP3RDE2V-df18550930a9-512"},
+      {name:"Yuri Andrea Marca Ortiz",photo:"https://ca.slack-edge.com/TK3E9TUMC-U08KAK0CP2S-2b019dd60908-512"}
+    ];
+
+    // ── ESTADO DEL JUGADOR ACTUAL ──
+    let currentPlayer = null;  // { name, photo }
+
+    // ════════════════════════════════════════════════════════
+    //  CONFIGURACIÓN GOOGLE SHEETS
+    //  👉 Pega aquí la URL de tu Apps Script después de publicarlo
+    // ════════════════════════════════════════════════════════
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycby3NIQ4U-Cb6cuimC1wViNlDoVW-I1pVWbB1yhYDEPGgrmn68f91SBLUCmIhS23z0DxPQ/exec';
+
+    const PLAYER_KEY = 'foxito_current_player';
+
+    // Cache local del leaderboard para no pedir a Sheets en cada render
+    let _leaderboardCache = [];
+    let _lastFetch = 0;
+    const FETCH_INTERVAL = 30000; // refrescar cada 30s
+
+    // ── OBTENER LEADERBOARD DESDE GOOGLE SHEETS ──
+    async function fetchLeaderboard(force = false) {
+        const now = Date.now();
+        if (!force && now - _lastFetch < FETCH_INTERVAL && _leaderboardCache.length > 0) {
+            return _leaderboardCache; // usar cache
+        }
+        if (SHEET_URL === 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT') {
+            return _leaderboardCache; // URL no configurada aún
+        }
+        try {
+            const res = await fetch(`${SHEET_URL}?action=get2`);
+            const json = await res.json();
+            if (json.ok && Array.isArray(json.data)) {
+                _leaderboardCache = json.data;
+                _lastFetch = now;
+            }
+        } catch(e) {
+            console.warn('No se pudo cargar el leaderboard:', e);
+        }
+        return _leaderboardCache;
+    }
+
+    (async function initPlayer() {
+        fetchTop24(); // cargar top 24
+        // Cargar leaderboard desde Sheets en segundo plano
+        fetchLeaderboard(true).then(() => renderAllLeaderboards());
+
+        try {
+            const saved = JSON.parse(localStorage.getItem(PLAYER_KEY) || 'null');
+            if (saved && saved.name && saved.photo) {
+                const found = EMPLOYEES.find(e => e.name === saved.name);
+                if (found) {
+                    selectPlayer(found.name, found.photo);
+                    return;
+                }
+            }
+        } catch(e) {}
+        // Mostrar modal de selección
+        renderPlayerList(EMPLOYEES);
+    })();
+
+    // Refrescar leaderboard automáticamente cada 30s mientras la página está abierta
+    setInterval(() => {
+        fetchLeaderboard(true).then(() => renderAllLeaderboards());
+    }, 30000);
+
+    // Ticker del countdown cada segundo
+    setInterval(() => {
+        const el = document.getElementById('lb-countdown');
+        if (el) {
+            const t = getCountdownText();
+            if (t) {
+                el.textContent = t;
+            } else {
+                // Acaba de cerrar — re-renderizar todo con banner cerrado
+                renderAllLeaderboards();
+            }
+        }
+    }, 1000);
+
+    </script>
 
     <!-- ── GAME ENGINE ── -->
     <script>
